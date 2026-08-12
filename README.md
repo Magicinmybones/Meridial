@@ -32,7 +32,7 @@ src/                       the site — this directory is what gets deployed
   js/main.js               chart backdrop + marquee measurement
   assets/
     fonts/                 Geist woff2 (Suisse Intl stand-in), DM Sans
-    images/                the hero glow and the signal wash
+    images/                gradient-08 (hero glow and signal wash), radar texture
     logos/
       meridial-mark.svg    the Meridial mark, standalone
       favicon.svg          the same mark on the hero's top surface colour

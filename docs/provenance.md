@@ -67,9 +67,22 @@ own geometry rather than a redrawing.
 - **The radar chips** resolve through their component instances to
   `Size=Small, Type=Primary` — `#32A7D4` with white DM Sans, the one piece of
   colour in an otherwise monochrome design. Reproduced as found.
-- **The wash** carries two stacked 3 MB image fills. The upper one is opaque
-  RGB drawn to cover, so the lower is 100% occluded and omitted — the same
-  judgement made for `gradient-01` in the hero, and 3.18 MB saved.
+- **The wash** carries two stacked image fills, and they turn out to be the
+  hero's pair: `gradient-08` over `gradient-01`. The upper is opaque and drawn
+  to cover, so the lower is 100% occluded and omitted, and the upper is the
+  same asset the hero glow already ships — so the section reuses it rather
+  than carrying a second 3.1 MB copy.
+
+  It also carries `paintFilter: { vibrance: -1 }`, which resolves fully
+  desaturated. Reading that matters: the raw asset is strongly red, and drawing
+  it unfiltered tinted the whole section maroon. Paint filters are nested under
+  `paintFilter` rather than sitting flat on the paint, which is how it was
+  missed the first time.
+
+  The artboard draws the wash as a rounded, bordered rectangle inset in the
+  board. That rectangle is the shot's own screen edge — the same kind of
+  presentation chrome as the outer frames — so it is dropped, and the wash
+  bleeds the full section the way the hero's glow does.
 - **DM Sans Medium** is a second face, used only for the radar's month axis
   and chips. It is openly licensed, so unlike Suisse Intl it ships with the
   site rather than standing in.

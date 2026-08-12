@@ -694,17 +694,20 @@ img, svg { display: block; }
   margin-inline: auto;
 }
 
-/* The wash carries two stacked image fills in the artboard; the upper one is
-   opaque and drawn to cover, so the lower is fully occluded and omitted. */
+/* The artboard draws this as a rounded, bordered rectangle inset in the board —
+   that rectangle is the shot's own screen edge, not part of the site, so it is
+   dropped and the wash bleeds the full section the way the hero's glow does.
+
+   Two image fills are stacked in the file. The upper one is `gradient-08`, the
+   same asset the hero glow uses, carrying `vibrance: -1` — fully desaturated,
+   reproduced with grayscale so the source stays untouched. It is opaque and
+   drawn to cover, so the `gradient-01` beneath it is completely occluded and
+   omitted, exactly as in the hero. */
 .signal__wash {
   position: absolute;
-  left: calc(100% * 11 / var(--artboard-w));
-  inline-size: calc(100% * 1573 / var(--artboard-w));
-  top: calc(8 * var(--u));
-  block-size: calc(1138 * var(--u));
-  border-radius: calc(10 * var(--u));
-  border: var(--hairline) solid rgba(255, 255, 255, 0.1);
-  background: #ffffff url('../assets/images/signal-backdrop.png') center / cover no-repeat;
+  inset: 0;
+  background: #ffffff url('../assets/images/gradient-08.png') center / cover no-repeat;
+  filter: grayscale(1);
   opacity: 0.2;
 }
 
