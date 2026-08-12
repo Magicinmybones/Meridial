@@ -178,9 +178,45 @@ curves per frame, not sampled. Times relative to the travel's start (f272):
 
 The masthead finding is the important one: its navigation slides from the
 hero's column-bound layout to the signal's full-width one (CTA x388→x615 in
-the 720-wide reference), handing over at the swap. Both deltas are measured
+the 720-wide reference), handing over at the swap. Every delta is measured
 from the two laid-out mastheads at runtime — nothing is hardcoded, so the
 slide is correct at every viewport.
+
+### The wordmark's snap
+
+Traced through the travel in a real browser at nine viewports, in both
+directions, sampling every masthead part per animation frame: **nothing in the
+masthead moves vertically** — the hero's top and the signal's agree to 0.00 px
+at every viewport, and the page never scrolls or changes width. The fault was
+horizontal, and it was on the one part of the masthead that was not being
+carried.
+
+The two mastheads sit in the same box — the shell, capped and centred — but
+stated their insets in different terms. The hero's came from `.hero__content`'s
+padding, in units (`35 × --u`); the signal's were a fraction of the artboard
+(`34 / 1606 × 100%`). Those agree only at the artboard's own aspect and drift
+apart everywhere else:
+
+| viewport | wordmark gap, before | after |
+|---|---|---|
+| 1280 × 800 | +2.98 px | −0.69 px |
+| 1440 × 900 | +3.35 px | −0.79 px |
+| 1536 × 864 | +6.49 px | −0.73 px |
+| 1920 × 1080 | +8.09 px | −0.92 px |
+| 2560 × 1440 | +10.78 px | −1.25 px |
+
+The travel slides the navigation and the call to action onto their signal
+positions, so the whole of that drift landed on the wordmark, which snapped
+sideways at the swap — right as everything else settled. Holding both insets in
+units leaves the two boxes differing by the one unit the artboards actually
+differ by (x35 against x34), and the wordmark now travels on the same measured,
+translate-only terms as the other two.
+
+Measured on the frames either side of the handover, the visible masthead is now
+continuous to within **0.05 px** on the wordmark and **0.22 px** on the call to
+action, at every viewport — against 3–11 px before. Confirmed in the recording
+too: the wordmark's left edge holds at one column through the swap where it
+previously stepped across.
 
 Cascade verified with transitions disabled (headless cannot animate them):
 during the travel the nav computes `translateX(334.5px)` and the CTA

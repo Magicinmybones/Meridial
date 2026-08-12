@@ -112,8 +112,10 @@
     var heroPanel = document.querySelector('[data-hero-panel]');
     var heroCards = document.querySelectorAll('.panel .card');
     var heroContent = document.querySelector('.hero__content');
+    var heroBrand = document.querySelector('.section--hero .brand');
     var heroNav = document.querySelector('.section--hero .mainnav');
     var heroCta = document.querySelector('.section--hero .btn-nav');
+    var sigBrand = document.querySelector('.signal__masthead .brand');
     var sigNav = document.querySelector('.signal__masthead .mainnav');
     var sigCta = document.querySelector('.signal__masthead .btn-nav');
     var wash = document.querySelector('[data-signal-wash]');
@@ -170,21 +172,26 @@
           (-rel(heroContent || heroSection, hs).width * 0.35).toFixed(1) + 'px');
       }
 
-      /* The masthead's navigation and call-to-action slide from the hero's
-         layout to the signal's, so the swap hands one masthead to the other
-         mid-gesture. Their travel is the difference between the two layouts,
+      /* The masthead slides from the hero's layout to the signal's, so the swap
+         hands one masthead to the other mid-gesture. Every part of it is
+         carried: the wordmark's delta is small, but a part left behind arrives
+         by teleporting at the swap, which is the one thing the handover cannot
+         afford. Each travel is the difference between the two layouts,
          measured the same way as everything else. */
-      if (heroNav && sigNav && heroCta && sigCta) {
+      var pairs = [
+        [heroBrand, sigBrand, '--brand-dx'],
+        [heroNav, sigNav, '--nav-dx'],
+        [heroCta, sigCta, '--cta-dx']
+      ];
+      for (var i = 0; i < pairs.length; i++) {
+        var from = pairs[i][0], to = pairs[i][1];
+        if (!(from && to)) continue;
         /* inline only for the measurement — an inline 'none' left behind
            would outweigh the class rule that slides them */
-        heroNav.style.transform = 'none';
-        heroCta.style.transform = 'none';
-        var dNav = rel(sigNav, ss).left - rel(heroNav, hs).left;
-        var dCta = rel(sigCta, ss).left - rel(heroCta, hs).left;
-        heroNav.style.transform = '';
-        heroCta.style.transform = '';
-        root.style.setProperty('--nav-dx', dNav.toFixed(1) + 'px');
-        root.style.setProperty('--cta-dx', dCta.toFixed(1) + 'px');
+        from.style.transform = 'none';
+        var dx = rel(to, ss).left - rel(from, hs).left;
+        from.style.transform = '';
+        root.style.setProperty(pairs[i][2], dx.toFixed(1) + 'px');
       }
 
       place(wasTravelling);

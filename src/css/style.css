@@ -740,11 +740,21 @@ img, svg { display: block; }
 
 /* Artboard: brand at x34, navigation centred on the board's own centre, call
    to action ending 43.34 from the right. Unlike the hero's, this masthead
-   spans the full width — the same three-track grid does both. */
+   spans the full width — the same three-track grid does both.
+
+   The insets are units, not percentages of the board, because the hero states
+   its own gutter in units (§4, `.hero__content` padding). Both mastheads sit
+   in the same box — the shell, capped and centred — so stating one in units
+   and the other as a fraction of 1606 made them agree only at the artboard's
+   own aspect and drift apart everywhere else: 3 px at 1280x800, 11 px at
+   2560x1440. The travel slides the navigation and the call to action onto
+   their signal positions, so that drift landed entirely on the wordmark, which
+   snapped sideways at the swap. Held in units, the two boxes differ by the one
+   unit the artboards actually differ by. */
 .signal__masthead {
   position: absolute;
-  left: calc(100% * 34 / var(--artboard-w));
-  right: calc(100% * 43.34 / var(--artboard-w));
+  left: calc(34 * var(--u));
+  right: calc(43.34 * var(--u));
   top: calc(46 * var(--u));
 }
 
@@ -1148,11 +1158,17 @@ img, svg { display: block; }
   transform: translateX(var(--hero-out-x, -12vw));
 }
 
+/* The wordmark travels on the same terms. Its delta is small — the artboards
+   put it at x35 in the hero and x34 here — but it is not zero, and anything in
+   the masthead that is not carried across the swap arrives by teleporting.
+   Measured like the other two, so it stays right at every viewport. */
+.morph-ready .section--hero .brand,
 .morph-ready .section--hero .mainnav,
 .morph-ready .section--hero .btn-nav {
   transition: transform 850ms var(--morph-ease) 150ms;
   will-change: transform;
 }
+.to-signal .section--hero .brand   { transform: translateX(var(--brand-dx, 0px)); }
 .to-signal .section--hero .mainnav { transform: translateX(var(--nav-dx, 0px)); }
 .to-signal .section--hero .btn-nav { transform: translateX(var(--cta-dx, 0px)); }
 
