@@ -4,6 +4,16 @@
 (function () {
   'use strict';
 
+  /* The travel's length. Authored in the stylesheet (--morph-dur) so the
+     timing has one home; read back here to know when the swap is due. */
+  var DURATION = (function () {
+    var v = getComputedStyle(document.documentElement)
+              .getPropertyValue('--morph-dur');
+    var n = parseFloat(v);
+    if (!n) return 1000;
+    return /ms/.test(v) ? n : n * 1000;
+  })();
+
   /**
    * Chart backdrop.
    * Artboard: fourteen dashed verticals, 21 units apart, 120 units tall,
@@ -77,37 +87,40 @@
 
 
   /**
-   * The transition between the two sections.
+   * The travel from the hero to the signal board.
    *
-   * The site is one screen and never scrolls. A wheel, swipe or arrow key
-   * moves between the hero and the signal board, and the motion is the one the
-   * reference shows: the hero panel's background expands out of the right
-   * column until it owns the screen, its two cards travel left into the
-   * board's first column, the hero's own column clears out to the left, and
-   * the rest of the board arrives once the cards have landed.
+   * The site is one screen and never scrolls: a wheel, swipe or arrow key
+   * moves between the two sections.
    *
-   * This function only measures and switches a class. The travel itself is a
-   * CSS transition — see §18. What is measured is where each shared element
-   * sits in the hero versus where it sits in the board, expressed as the
-   * transform that puts the board's copy on top of the hero's. At rest the two
-   * screens coincide element for element, which is what makes the handover
-   * invisible.
+   * What moves is the hero's own elements. Its glow expands until it owns the
+   * screen — becoming the signal section's background — and its panel carries
+   * the two cards left into the board's first column, while the hero's text
+   * column clears to the left. The signal section stays out of the document's
+   * paint until that travel finishes, so at no point are two copies of the
+   * panel on screen and nothing of the second section overlaps the first.
+   *
+   * The swap at the end is a single frame, and it is invisible because by then
+   * the hero's glow and panel are sitting exactly where the signal section
+   * draws its own. Those two targets are measured here; the interpolation is a
+   * CSS transition (§18).
    */
   function Transition() {
     var root = document.documentElement;
-    var wash = document.querySelector('[data-signal-wash]');
-    var col1 = document.querySelector('[data-board-col1]');
+    var heroSection = document.querySelector('.section--hero');
+    var signalSection = document.querySelector('.section--signal');
     var heroGlow = document.querySelector('[data-hero-glow]');
     var heroPanel = document.querySelector('[data-hero-panel]');
     var heroContent = document.querySelector('.hero__content');
-    var heroSection = document.querySelector('.section--hero');
-    var signalSection = document.querySelector('.section--signal');
-    if (!(wash && col1 && heroGlow && heroPanel && heroSection && signalSection)) {
+    var wash = document.querySelector('[data-signal-wash]');
+    var col1 = document.querySelector('[data-board-col1]');
+    if (!(heroSection && signalSection && heroGlow && heroPanel && wash && col1)) {
       return null;
     }
 
-    var washFrom = 'none';
-    var colFrom = 'none';
+    var glowTo = 'none';
+    var panelTo = 'none';
+    var shown = false;
+    var timer = 0;
 
     function rel(el, box) {
       var r = el.getBoundingClientRect();
@@ -117,75 +130,93 @@
       };
     }
 
-    /* Both ends are taken relative to their own section. The sections are
-       stacked on the same screen and each is exactly one screen, so a
-       section-relative rect is the rect the element occupies on screen. */
+    /* Each section is exactly one screen and they are stacked on it, so a
+       section-relative rect is the rect the element occupies on screen. The
+       signal section is measured while hidden — visibility still lays out. */
     function measure() {
+      var wasShown = shown;
+      var wasTravelling = root.classList.contains('to-signal');
+
+      /* Measure the rest state: no transforms, no travel classes. Reading
+         geometry flushes style, so the transition has to be suppressed across
+         it or the browser treats the cleared value as a starting point and
+         animates into place on load. */
+      root.classList.remove('to-signal');
+      heroGlow.style.transition = 'none';
+      heroPanel.style.transition = 'none';
+      heroGlow.style.transform = 'none';
+      heroPanel.style.transform = 'none';
+
       var hs = heroSection.getBoundingClientRect();
       var ss = signalSection.getBoundingClientRect();
-
-      var was = root.classList.contains('to-signal');
-      root.classList.remove('to-signal');
-
-      /* Measuring means clearing the transform and reading geometry back, and
-         the read flushes style — so without this the browser would treat the
-         cleared value as a starting point and animate into the rest position
-         on load. Suppress the transition across the measurement. */
-      wash.style.transition = 'none';
-      col1.style.transition = 'none';
-      wash.style.transform = 'none';
-      col1.style.transform = 'none';
-
       var g = rel(heroGlow, hs);
       var p = rel(heroPanel, hs);
       var w = rel(wash, ss);
       var c = rel(col1, ss);
 
-      if (w.width && c.width && g.width && p.width) {
-        washFrom =
-          'translate(' + (g.left - w.left).toFixed(2) + 'px,' +
-                         (g.top - w.top).toFixed(2) + 'px) scale(' +
-          (g.width / w.width).toFixed(4) + ',' +
-          (g.height / w.height).toFixed(4) + ')';
+      if (g.width && p.width && w.width && c.width) {
+        /* the glow expands to the signal section's wash — the full screen */
+        glowTo =
+          'translate(' + (w.left - g.left).toFixed(2) + 'px,' +
+                         (w.top - g.top).toFixed(2) + 'px) scale(' +
+          (w.width / g.width).toFixed(4) + ',' +
+          (w.height / g.height).toFixed(4) + ')';
 
-        /* width alone — scaling both axes independently would stretch the type
-           inside the cards */
-        colFrom =
-          'translate(' + (p.left - c.left).toFixed(2) + 'px,' +
-                         (p.top - c.top).toFixed(2) + 'px) scale(' +
-          (p.width / c.width).toFixed(4) + ')';
+        /* the panel lands on the board's first column; width alone, because
+           scaling both axes independently would stretch the type */
+        panelTo =
+          'translate(' + (c.left - p.left).toFixed(2) + 'px,' +
+                         (c.top - p.top).toFixed(2) + 'px) scale(' +
+          (c.width / p.width).toFixed(4) + ')';
 
         root.style.setProperty('--hero-out-x',
           (-rel(heroContent || heroSection, hs).width * 0.35).toFixed(1) + 'px');
       }
 
-      place(was);
+      place(wasTravelling);
+      void heroGlow.offsetWidth;          /* flush as the new starting point */
+      heroGlow.style.transition = '';
+      heroPanel.style.transition = '';
 
-      /* Flush the placed transform as the new starting point, then hand the
-         transition back. */
-      void wash.offsetWidth;
-      wash.style.transition = '';
-      col1.style.transition = '';
-
-      if (was) root.classList.add('to-signal');
+      if (wasTravelling) root.classList.add('to-signal');
+      root.classList.toggle('signal-shown', wasShown);
+      root.classList.toggle('signal-in', wasShown);
     }
 
-    /* Settled means no transform at all — the board's own layout. At rest the
-       shared elements carry the transform that puts them where the hero has
-       them. */
-    function place(settled) {
-      wash.style.transform = settled ? 'none' : washFrom;
-      col1.style.transform = settled ? 'none' : colFrom;
+    function place(travelled) {
+      heroGlow.style.transform = travelled ? glowTo : 'none';
+      heroPanel.style.transform = travelled ? panelTo : 'none';
     }
 
-    function go(to) {
-      if (to === root.classList.contains('to-signal')) return;
-      root.classList.toggle('to-signal', to);
-      place(to);
+    function go(forward) {
+      if (forward === shown) return;
+      clearTimeout(timer);
+      shown = forward;
+
+      if (forward) {
+        root.classList.add('to-signal');
+        place(true);
+        /* The signal section takes over the moment the travel lands, when the
+           two are identical, then its own content fades in. */
+        timer = setTimeout(function () {
+          root.classList.add('signal-shown');
+          /* A tick later, so the browser has the section on screen before the
+             opacity transition starts and actually animates it. A timer rather
+             than a frame callback: frames are not guaranteed to be produced
+             when nothing else is moving. */
+          timer = setTimeout(function () {
+            root.classList.add('signal-in');
+          }, 20);
+        }, DURATION);
+      } else {
+        root.classList.remove('signal-shown', 'signal-in');
+        root.classList.remove('to-signal');
+        place(false);
+      }
     }
 
-    /* One gesture moves one section. The lock clears when the wheel goes quiet,
-       so a trackpad's long inertial tail cannot bounce it back and forth. */
+    /* One gesture moves one section. The lock clears when the wheel goes
+       quiet, so a trackpad's inertial tail cannot bounce it back and forth. */
     var locked = false;
     var quiet = 0;
 

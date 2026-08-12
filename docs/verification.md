@@ -97,36 +97,34 @@ stylesheet still owes, and §10 is where it belongs.
 
 ## Motion
 
-**The site never scrolls.** It is one screen, `overflow: hidden`, with both
-sections stacked on it. Moving between them is a transition, not a scroll
-position, so no scrollbar exists in either axis — the harness asserts
-`scrollHeight <= clientHeight` as well as the horizontal case.
+**The site never scrolls.** One screen, `overflow: hidden`, both sections
+stacked on it. Moving between them is a transition, so no scrollbar exists in
+either axis — asserted directly.
 
-The hero plays itself in on load. Delays and durations were measured off the
-reference recording frame by frame at 60fps and live in §17.
+**Only one section is ever painted.** The signal section is `visibility:
+hidden` until the travel finishes; the hero is hidden the moment it takes over.
+Nothing of the second section overlaps the first and no element is ever drawn
+twice. Verified at rest:
 
-The move between the sections reproduces the mechanic rather than the frames:
-the hero panel's background expands out of the right column until it owns the
-screen, its two cards travel left into the board's first column, the hero's own
-column clears to the left, and the rest of the board arrives once the cards
-have landed. One second, matching the recording.
+| | rest | travelling | after the swap |
+|---|---|---|---|
+| signal section | hidden | hidden | visible |
+| hero section | visible | visible | hidden |
+| hero glow transform | none | `scale(2.82)` to full screen | held |
+| hero panel transform | none | `translate(-1170px, +91px) scale(1.29)` | held |
 
-At rest the two sections coincide element for element — the signal wash carries
-the hero glow's transform, its first column carries the hero panel's — which is
-what makes the handover invisible. Measured at 1920x1080:
+What moves is the hero's own elements: its glow expands until it owns the
+screen and becomes the second section's background, its panel carries the two
+cards left into the board's first column, and its text column clears to the
+left. The swap at the end is a single frame and is invisible because by then
+the hero's glow and panel sit exactly where the signal section draws its own.
+The board's first column is a spacer while the travel runs, so the cards are
+never doubled.
 
-| | rest | settled |
-|---|---|---|
-| wash | x1239.8 w680.3 (the hero glow) | x0 w1920 |
-| column one | x1427.3 w305.1 (the hero panel) | x256.9 w396.4 |
+The hero itself is untouched by any of this — no rule in §17 or §18 changes its
+layout, and all nine viewports still pass every assertion above.
 
-The script only measures and switches a class; the travel is a CSS transition,
-so the browser interpolates and nothing is tweened frame by frame.
-
-**Two faults worth recording.** Animating opacity on the title's three lines
-gives each its own stacking context, and a composited child cannot show through
-an ancestor's `background-clip: text` — the headline vanished entirely. Each
-line now carries its own slice of the gradient. And measuring means clearing
-the transform and reading geometry back, which flushes style: without
-suppressing the transition across the measurement the browser treated the
-cleared value as a starting point and animated into the rest position on load.
+**Not verifiable here.** CSS transitions need produced frames, and headless
+Chromium starves them once the page goes idle. The end states, the classes and
+the measured transforms are asserted; the interpolation between them — how the
+motion actually feels — needs a real browser.

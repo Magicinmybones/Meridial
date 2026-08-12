@@ -1051,9 +1051,8 @@ img, svg { display: block; }
   overflow: hidden;
 }
 
-/* Both sections occupy the same screen. The site never scrolls — the
-   transition between them is driven by the wheel, so no scrollbar exists at
-   any point and neither section ever leaves the viewport. */
+/* Both sections occupy the same screen. The site never scrolls — moving
+   between them is a transition, so no scrollbar exists at any point. */
 .section--hero,
 .section--signal {
   position: absolute;
@@ -1061,60 +1060,65 @@ img, svg { display: block; }
   block-size: 100svh;
 }
 
-/* Without the script the signal section would sit on top of the hero, so it is
-   hidden until the transition layer is live and has placed it. */
+/* Only one section is ever on screen. The signal section does not exist until
+   the travel has finished, so nothing of it can overlap the hero or double any
+   of the hero's elements — the hero is exactly the design, untouched. */
 .section--signal { visibility: hidden; }
-.morph-ready .section--signal { visibility: visible; }
+.signal-shown .section--signal { visibility: visible; }
+.signal-shown .section--hero { visibility: hidden; }
 
-/* The travel itself is a CSS transition. JavaScript measures the two ends and
-   hands the start transform over as a custom property; the browser does the
-   interpolation. Nothing is tweened frame by frame in script.
+/* --------------------------------------------------------------------------
+   18. The travel
+   The hero's own glow expands until it owns the screen, and the hero's own
+   panel carries its two cards left into the board's first column. Nothing is
+   duplicated: these are the hero's elements moving. The swap to the signal
+   section happens in a single frame at the end, when the two are
+   geometrically identical and the change cannot be seen.
 
-   At rest the signal section sits exactly on top of the hero: its wash carries
-   the hero glow's transform, and its first column carries the hero panel's, so
-   the two screens coincide element for element. That is what makes the swap
-   invisible — the same cards really are in the same place. */
-/* The start transform is written inline by the script, because that is the one
-   place it can be: it is measured, not authorable. The transition, the easing
-   and the duration stay here. */
-.morph-ready [data-signal-wash],
-.morph-ready [data-board-col1] {
-  transform-origin: 0 0;
+   JavaScript measures where each element has to land and writes that
+   transform inline — it is measured, not authorable. Duration and easing
+   live here.
+   -------------------------------------------------------------------------- */
+.morph-ready .hero__glow,
+.morph-ready .panel {
   transition: transform var(--morph-dur) var(--morph-ease);
   will-change: transform;
 }
 
-/* The hero's column clears to the left as the panel takes the screen, and its
-   own glow and cards hand over to the ones underneath. */
-.morph-ready .hero__content,
-.morph-ready .hero__glow,
-.morph-ready .panel {
+.morph-ready .hero__content {
   transition: opacity calc(var(--morph-dur) * 0.55) var(--morph-ease),
-              transform calc(var(--morph-dur) * 0.55) var(--morph-ease);
+              transform calc(var(--morph-dur) * 0.7) var(--morph-ease);
 }
 .to-signal .hero__content {
   opacity: 0;
   transform: translateX(var(--hero-out-x, -12vw));
 }
-.to-signal .hero__glow,
-.to-signal .panel { opacity: 0; }
 
-/* The rest of the board arrives once the cards have landed. */
+/* The board's first column is a spacer while the travel runs: the hero's panel
+   stands in its place, so painting it too would double the cards. */
+.morph-ready [data-board-col1] { visibility: hidden; }
+
+/* Everything the signal section adds arrives after the swap — the new content
+   coming in once the panel has taken the screen. */
+.morph-ready .board,
 .morph-ready [data-reveal='board-mid'],
 .morph-ready [data-reveal='board-end'],
 .morph-ready [data-reveal='signal-title'],
 .morph-ready [data-reveal='signal-masthead'] {
   animation: none;
   opacity: 0;
+}
+.signal-in .board,
+.signal-in [data-reveal='board-mid'],
+.signal-in [data-reveal='board-end'],
+.signal-in [data-reveal='signal-title'],
+.signal-in [data-reveal='signal-masthead'] {
+  opacity: 1;
   transition: opacity calc(var(--morph-dur) * 0.45) var(--morph-ease);
 }
-.to-signal [data-reveal='board-mid'],
-.to-signal [data-reveal='board-end'],
-.to-signal [data-reveal='signal-title'],
-.to-signal [data-reveal='signal-masthead'] {
-  opacity: 1;
-  transition-delay: calc(var(--morph-dur) * 0.6);
-}
+.signal-in [data-reveal='board-mid'] { transition-delay: 60ms; }
+.signal-in [data-reveal='board-end'] { transition-delay: 120ms; }
+.signal-in [data-reveal='signal-title'] { transition-delay: 180ms; }
 
 /* --------------------------------------------------------------------------
    19. Motion preferences, continued
@@ -1127,7 +1131,7 @@ img, svg { display: block; }
   .morph-ready [data-reveal='board-end'],
   .morph-ready [data-reveal='signal-title'],
   .morph-ready [data-reveal='signal-masthead'] { opacity: 1; }
-  .morph-ready [data-signal-wash],
-  .morph-ready [data-board-col1] { transform: none !important; }
+  .morph-ready .hero__glow,
+  .morph-ready .panel { transform: none !important; }
   .morph-ready .hero__content { opacity: 1; transform: none; }
 }
