@@ -123,9 +123,10 @@ curves per frame, not sampled. Times relative to the travel's start (f272):
 | panel cards | travel left with the panel | 0–1000ms |
 | **masthead nav + CTA** | **slide right — never fade** | 150–1000ms |
 | swap of sections | single frame, geometrically aligned | 1000ms |
-| board box | full extent appears at once, **fades up over 185ms** after a 170ms hold | 1170–1355ms |
+| board box | **top-anchored downward wipe** — top edge pinned, bottom sweeps 132→350, ease-in-out | 1170–1540ms |
+| panel title & caption | **stay where they are** and fade out during the travel's second half | 350–850ms |
 | columns two & three | fade in | ~1470ms |
-| closing line | fades in **last** | ~1900ms |
+| closing line | fades in **last**, in place, slowly | 1900–2280ms |
 
 The masthead finding is the important one: its navigation slides from the
 hero's column-bound layout to the signal's full-width one (CTA x388→x615 in
@@ -147,6 +148,17 @@ transform — the cover crop recomputes as it widens, so the texture is
 progressively revealed the way the recording shows instead of being stretched
 2.8×, and at left 0 it renders pixel-identically to the wash it hands over to.
 Verified: glow travels (1239.8, w680.3) → (0, w1920), wash at (0, w1920).
+
+**Only the cards travel.** The panel's title and caption do not follow them:
+their edge energy holds at their own position until ~350ms into the travel,
+then decays over ~500ms, completing before the swap. The travel transform is
+applied to the two cards individually (the same translate — it is
+translate-only), and the title and caption fade where they stand.
+
+**A probe lesson.** `* { transition: none !important }` does not match
+pseudo-elements, so a `::before` transition survives it; under starved frames
+its computed value then freezes at the transition's start, which looks exactly
+like a cascade failure. The kill-switch needs `*, *::before, *::after`.
 
 **Not verifiable here.** CSS transitions need produced frames, and headless
 Chromium starves them once the page goes idle. End states, classes and measured

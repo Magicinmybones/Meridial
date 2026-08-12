@@ -1079,10 +1079,20 @@ img, svg { display: block; }
    transform inline — it is measured, not authorable. Duration and easing
    live here.
    -------------------------------------------------------------------------- */
-.morph-ready .panel {
+/* Only the two cards travel. The panel's title and caption stay where they
+   are and fade out during the travel's second half — measured: the caption's
+   edge energy holds at its own position until ~350ms in, then decays over
+   ~500ms, completing before the swap. */
+.morph-ready .panel .card {
   transition: transform var(--morph-dur) var(--morph-ease);
   will-change: transform;
 }
+.morph-ready .panel__title,
+.morph-ready .panel__caption {
+  transition: opacity 500ms var(--morph-ease) 350ms;
+}
+.to-signal .panel__title,
+.to-signal .panel__caption { opacity: 0; }
 
 /* The glow expands by widening — its left edge travels to the viewport's,
    while its top, bottom and right are already there. The background's cover
@@ -1144,13 +1154,16 @@ img, svg { display: block; }
   transform-origin: 50% 0;
 }
 
-/* Measured at full rate from the dark-pixel density curve: the cards sit
-   alone for 170ms after landing, then the box's full extent appears at once
-   and fades up over 185ms. It neither grows nor slides. */
-.morph-ready .board::before { opacity: 0; }
+/* Measured from the newly-dark-pixel bounds at full rate: the box's top edge
+   is pinned from its first visible frame while its bottom sweeps down —
+   132→350 across ~22 frames, accelerating then decelerating. A top-anchored
+   downward reveal, starting 170ms after the cards land. */
+.morph-ready .board::before {
+  clip-path: inset(0 0 100% 0);
+}
 .signal-in .board::before {
-  opacity: 1;
-  transition: opacity 185ms var(--morph-ease) 170ms;
+  clip-path: inset(0 0 0% 0);
+  transition: clip-path 370ms var(--morph-ease) 170ms;
 }
 
 /* The cards keep their own stacking above the box that arrives behind them. */
@@ -1171,8 +1184,12 @@ img, svg { display: block; }
   opacity: 1;
   transition: opacity 200ms var(--morph-ease) 390ms;
 }
-/* The closing line is the last thing to arrive, well after the columns. */
-.signal-in [data-reveal='signal-title'] { transition-delay: 850ms; }
+/* The closing line is the last thing to arrive, well after the columns —
+   measured: a ~380ms fade beginning ~900ms after the swap, in place. */
+.signal-in [data-reveal='signal-title'] {
+  transition-duration: 380ms;
+  transition-delay: 900ms;
+}
 
 /* --------------------------------------------------------------------------
    19. Motion preferences, continued

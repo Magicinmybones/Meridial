@@ -110,6 +110,7 @@
     var signalSection = document.querySelector('.section--signal');
     var heroGlow = document.querySelector('[data-hero-glow]');
     var heroPanel = document.querySelector('[data-hero-panel]');
+    var heroCards = document.querySelectorAll('.panel .card');
     var heroContent = document.querySelector('.hero__content');
     var heroNav = document.querySelector('.section--hero .mainnav');
     var heroCta = document.querySelector('.section--hero .btn-nav');
@@ -145,8 +146,10 @@
          it or the browser treats the cleared value as a starting point and
          animates into place on load. */
       root.classList.remove('to-signal');
-      heroPanel.style.transition = 'none';
-      heroPanel.style.transform = 'none';
+      eachCard(function (el) {
+        el.style.transition = 'none';
+        el.style.transform = 'none';
+      });
 
       var hs = heroSection.getBoundingClientRect();
       var ss = signalSection.getBoundingClientRect();
@@ -186,15 +189,24 @@
 
       place(wasTravelling);
       void heroPanel.offsetWidth;         /* flush as the new starting point */
-      heroPanel.style.transition = '';
+      eachCard(function (el) { el.style.transition = ''; });
 
       if (wasTravelling) root.classList.add('to-signal');
       root.classList.toggle('signal-shown', wasShown);
       root.classList.toggle('signal-in', wasShown);
     }
 
+    /* The travel is applied to the two cards, not the panel: the panel's
+       title and caption stay behind and fade where they stand. The delta is
+       the same for both cards — the travel is translate-only. */
+    function eachCard(fn) {
+      for (var i = 0; i < heroCards.length; i++) fn(heroCards[i]);
+    }
+
     function place(travelled) {
-      heroPanel.style.transform = travelled ? panelTo : 'none';
+      eachCard(function (el) {
+        el.style.transform = travelled ? panelTo : 'none';
+      });
     }
 
     function go(forward) {
