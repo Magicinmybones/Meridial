@@ -124,32 +124,41 @@ def measure(w, h, shot=False):
 def check(d, stacked=False):
     """Returns list of failure strings.
 
-    `stacked` = a second section is present, so the page legitimately scrolls
-    vertically and a scrollbar narrows the layout viewport. Horizontal
-    overflow and the glow reaching the *content* edge must still hold."""
+    Horizontal comparisons use clientWidth, not innerWidth: once the page is
+    taller than one viewport a scrollbar exists, and innerWidth still counts
+    the space it occupies. The layout viewport is what the CSS lays out into."""
     f = []
-    vw, vh = d["vw"], d["vh"]
-    if d["scrollW"] > d["clientW"]:
-        f.append(f"h-scroll ({d['scrollW']}>{d['clientW']})")
-    if stacked:
-        glow = d["glow"]
-        if glow and abs(glow["r"] - d["clientW"]) > 0.5:
-            f.append(f"glow right {glow['r']} != content edge {d['clientW']}")
-        hero = d["hero"]
-        if hero and abs(hero["h"] - vh) > 1.5:
-            f.append(f"hero height {hero['h']} != vh {vh}")
-        return f
-    if d["scrollH"] > d["clientH"] + 1:
-        f.append(f"v-scroll ({d['scrollH']}>{d['clientH']})")
-    hero = d["hero"]
-    if hero:
-        if abs(hero["l"]) > 0.5 or abs(hero["r"] - vw) > 0.5:
-            f.append(f"hero not full-bleed (l={hero['l']} r={hero['r']} vw={vw})")
-        if abs(hero["h"] - vh) > 1.5:
-            f.append(f"hero height {hero['h']} != vh {vh}")
-    glow = d["glow"]
-    if glow and abs(glow["r"] - vw) > 0.5:
-        f.append(f"DEAD BAND: glow right {glow['r']} != vw {vw}")
+    vw, vh, cw = d["vw"], d["vh"], d["clientW"]
+
+    if d["scrollW"] > cw:
+        f.append(f"h-scroll ({d['scrollW']}>{cw})")
+
+    # every section owns exactly one viewport, and the page is their sum
+    n = 2 if d.get("signal") else 1
+    if not stacked and abs(d["scrollH"] - d["clientH"] * n) > 2:
+        f.append(f"page height {d['scrollH']} != {n} viewports ({d['clientH'] * n})")
+
+    for name, key in (("hero", "hero"), ("signal", "signal")):
+        b = d.get(key)
+        if not b:
+            continue
+        if abs(b["l"]) > 0.5 or abs(b["r"] - cw) > 0.5:
+            f.append(f"{name} not full-bleed (l={b['l']} r={b['r']} cw={cw})")
+        if abs(b["h"] - vh) > 1.5:
+            f.append(f"{name} height {b['h']} != vh {vh}")
+
+    glow = d.get("glow")
+    if glow and abs(glow["r"] - cw) > 0.5:
+        f.append(f"DEAD BAND: glow right {glow['r']} != content edge {cw}")
+
+    # the board holds the artboard's 328 / 407 / 407 column split
+    colA, colM, colE = d.get("colA"), d.get("colM"), d.get("colE")
+    if colA and colM and colE and colM["w"]:
+        if abs(colA["w"] / colM["w"] - 328 / 407) > 0.01:
+            f.append(f"board col1/col2 {colA['w'] / colM['w']:.4f} != 0.8059")
+        if abs(colE["w"] / colM["w"] - 1) > 0.01:
+            f.append(f"board col3/col2 {colE['w'] / colM['w']:.4f} != 1")
+
     return f
 
 

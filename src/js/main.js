@@ -11,29 +11,31 @@
    * coordinate space so it scales with the artboard.
    */
   function buildChartGrid() {
-    var svg = document.querySelector('[data-chart-grid]');
-    if (!svg) return;
+    var svgs = document.querySelectorAll('[data-chart-grid]');
+    if (!svgs.length) return;
 
     var NS = 'http://www.w3.org/2000/svg';
     var COUNT = 14;
     var STEP = 21;
     var HEIGHT = 120;
-    var frag = document.createDocumentFragment();
 
-    for (var i = 0; i < COUNT; i++) {
-      var x = i * STEP + 0.25;   /* a 0.5 stroke centres on the half unit */
-      var line = document.createElementNS(NS, 'line');
-      line.setAttribute('x1', x);
-      line.setAttribute('y1', 0);
-      line.setAttribute('x2', x);
-      line.setAttribute('y2', HEIGHT);
-      line.setAttribute('stroke', '#FFFFFF');
-      line.setAttribute('stroke-width', '0.5');
-      line.setAttribute('stroke-dasharray', '1 5');
-      line.setAttribute('stroke-opacity', '0.3');
-      frag.appendChild(line);
+    for (var s = 0; s < svgs.length; s++) {
+      var frag = document.createDocumentFragment();
+      for (var i = 0; i < COUNT; i++) {
+        var x = i * STEP + 0.25;   /* a 0.5 stroke centres on the half unit */
+        var line = document.createElementNS(NS, 'line');
+        line.setAttribute('x1', x);
+        line.setAttribute('y1', 0);
+        line.setAttribute('x2', x);
+        line.setAttribute('y2', HEIGHT);
+        line.setAttribute('stroke', '#FFFFFF');
+        line.setAttribute('stroke-width', '0.5');
+        line.setAttribute('stroke-dasharray', '1 5');
+        line.setAttribute('stroke-opacity', '0.3');
+        frag.appendChild(line);
+      }
+      svgs[s].appendChild(frag);
     }
-    svg.appendChild(frag);
   }
 
   /**

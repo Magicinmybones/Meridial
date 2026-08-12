@@ -50,6 +50,17 @@
   font-display: swap;
 }
 
+/* The signal section's radar is set in DM Sans Medium — a second face the
+   artboard uses for the month axis and the chart chips only. Open licence,
+   so it ships with the site rather than standing in. */
+@font-face {
+  font-family: 'DM Sans';
+  src: url('../assets/fonts/dm-sans-latin-500-normal.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* --------------------------------------------------------------------------
    2. Tokens
    -------------------------------------------------------------------------- */
@@ -658,3 +669,279 @@ img, svg { display: block; }
    `.hero__grid` does. Sizes inside it are `calc(<artboard number> * var(--u))`;
    structure is fractions and auto margins, never fixed offsets.
    -------------------------------------------------------------------------- */
+
+/* --------------------------------------------------------------------------
+   11. Signal shell — section two
+   Artboard: a 1567 x 1117 wash inset in the 1606 x 1161 board. The inset is
+   held as a proportion of the shell, so the wash fills the viewport the way
+   the hero does; everything inside it is sized in units.
+   -------------------------------------------------------------------------- */
+.section--signal {
+  display: flex;
+  align-items: center;
+  min-block-size: 100vh;
+  min-block-size: 100svh;
+  overflow: hidden;
+  background: var(--surface-bottom);
+}
+
+.signal {
+  position: relative;
+  inline-size: calc(min(100%, var(--shell-max)) * 1567 / var(--artboard-w));
+  block-size: calc(1117 * var(--u));
+  margin-inline: auto;
+}
+
+/* The wash carries two stacked image fills in the artboard; the upper one is
+   opaque and drawn to cover, so the lower is fully occluded and omitted. */
+.signal__wash {
+  position: absolute;
+  inset: 0;
+  border-radius: calc(10 * var(--u));
+  border: var(--hairline) solid rgba(255, 255, 255, 0.1);
+  background: #ffffff url('../assets/images/signal-backdrop.png') center / cover no-repeat;
+  opacity: 0.2;
+}
+
+/* Artboard: 847 units, centred on the wash. */
+.signal__title {
+  position: absolute;
+  top: calc(959 * var(--u));
+  left: 0;
+  right: 0;
+  margin: 0;
+  font-size: calc(48 * var(--u));
+  line-height: 1;
+  letter-spacing: var(--track-tight);
+  text-align: center;
+  background: linear-gradient(180deg, #ffffff 0%, #999999 100%);
+  -webkit-background-clip: text;
+          background-clip: text;
+  color: transparent;
+}
+
+/* --------------------------------------------------------------------------
+   12. Board
+   Artboard: 1198 x 689 at x100 of the wash — left of centre, which is the
+   design. Columns hold the artboard's 328 / 407 / 407 as proportions.
+   -------------------------------------------------------------------------- */
+.board {
+  position: absolute;
+  top: calc(179 * var(--u));
+  left: calc(100% * 100 / 1567);
+  inline-size: calc(100% * 1198 / 1567);
+  block-size: calc(689 * var(--u));
+  display: flex;
+  padding: calc(13 * var(--u)) calc(20 * var(--u)) calc(15 * var(--u)) calc(14 * var(--u));
+  border-radius: calc(39 * var(--u));
+  background: linear-gradient(180deg, var(--surface-top) 0%, rgba(25, 25, 25, 0.4) 100%);
+}
+
+.board__col {
+  display: flex;
+  flex-direction: column;
+  min-inline-size: 0;
+}
+.board__col--allocation { flex: 328 1 0; gap: calc(11 * var(--u)); }
+.board__col--mid        { flex: 407 1 0; gap: calc(12 * var(--u)); margin-inline-start: calc(13 * var(--u)); }
+.board__col--end        { flex: 407 1 0; gap: calc(12 * var(--u)); margin-inline-start: calc(9 * var(--u)); }
+
+/* --------------------------------------------------------------------------
+   13. Board cards
+   Same shell as the hero's panel cards — 25-unit radius, 10% black, a 10%
+   gradient hairline — but only the allocation column carries the artboard's
+   background blur, so the two are kept separate rather than shared.
+   -------------------------------------------------------------------------- */
+.board-card {
+  position: relative;
+  flex: none;
+  border-radius: calc(25 * var(--u));
+  background: rgba(0, 0, 0, 0.1);
+}
+.board-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: var(--hairline);
+  background: linear-gradient(127.6deg,
+    rgba(0, 0, 0, 0.1) 4.14%,
+    rgba(102, 102, 102, 0.1) 54.67%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+}
+.board-card--blur {
+  -webkit-backdrop-filter: blur(calc(77.65 * var(--u)));
+          backdrop-filter: blur(calc(77.65 * var(--u)));
+}
+
+.board-card--allocation  { block-size: calc(386 * var(--u)); }
+.board-card--value       { block-size: calc(264 * var(--u)); }
+.board-card--composition { block-size: calc(264 * var(--u)); }
+.board-card--activity    { block-size: calc(385 * var(--u)); }
+.board-card--digest      { block-size: calc(264 * var(--u)); }
+.board-card--assets      { block-size: calc(385 * var(--u)); }
+
+/* Card children carry their artboard coordinates, as in the hero. Left-anchored
+   by default so a card that stretches only gains space on its right; --end
+   anchors to the right edge for the items the artboard hangs there. */
+.bc__item {
+  position: absolute;
+  left: calc(var(--x) * var(--u));
+  top: calc(var(--y) * var(--u));
+  margin: 0;
+}
+.bc__item--end {
+  left: auto;
+  right: calc(var(--x) * var(--u));
+}
+.bc__stack { inline-size: calc(94 * var(--u)); }
+
+/* The artboard runs these at full strength, unlike the hero's dimmed note. */
+.board-card .card__note--bright { opacity: 1; }
+
+.board-card .trend {
+  inline-size: calc(260 * var(--u));
+  block-size: calc(117 * var(--u));
+  overflow: visible;
+}
+
+.digest__detail {
+  inline-size: calc(298 * var(--u));
+  font-size: calc(14 * var(--u));
+  line-height: 1.5;
+  letter-spacing: var(--track-narrow);
+  color: var(--white);
+  opacity: 0.4;
+}
+
+.bc__tag { inline-size: calc(104 * var(--u)); }
+
+/* --------------------------------------------------------------------------
+   14. Composition bars
+   Artboard: three bars from x18.02 to x361.2, widths in the ratio the figures
+   quote. Proportional so they stretch with the card.
+   -------------------------------------------------------------------------- */
+.bars {
+  position: absolute;
+  top: calc(var(--y) * var(--u));
+  left: calc(18.02 * var(--u));
+  right: calc(45.8 * var(--u));
+  display: flex;
+  block-size: calc(37 * var(--u));
+}
+/* The artboard steps the bars back by opacity rather than by colour —
+   100%, 40%, 20% — so the three read as one falling series. */
+.bars__bar {
+  flex: var(--w) 1 0;
+  background: var(--white);
+}
+.bars__bar:nth-child(2) { opacity: 0.4; }
+.bars__bar:nth-child(3) { opacity: 0.2; }
+.bars__bar + .bars__bar { margin-inline-start: calc(5.9 * var(--u)); }
+.bars__bar:last-child   { margin-inline-start: calc(4.91 * var(--u)); }
+
+/* --------------------------------------------------------------------------
+   15. Asset-class chart
+   Artboard: four bars on a 144.45 baseline, the leading one solid; the rest
+   carry the file's diagonal hatch — 2-unit stripes on a 4-unit period at
+   -20.209 degrees.
+   -------------------------------------------------------------------------- */
+.allocation {
+  inline-size: calc(356.98 * var(--u));
+  block-size: calc(172 * var(--u));
+}
+.allocation__value {
+  font-size: calc(20 * var(--u));
+  line-height: 1;
+  letter-spacing: var(--track-narrow);
+  color: var(--white);
+}
+.allocation__bar {
+  position: absolute;
+  left: calc(var(--x) * var(--u));
+  bottom: calc(27.55 * var(--u));
+  inline-size: calc(68.83 * var(--u));
+  block-size: calc(var(--h) * var(--u));
+  border-radius: calc(12 * var(--u));
+  background:
+    repeating-linear-gradient(-20.209deg,
+      rgba(231, 231, 231, 0.07) 0 calc(2 * var(--u)),
+      transparent calc(2 * var(--u)) calc(4 * var(--u))),
+    #0B0B0B;
+}
+.allocation__bar--lead {
+  inline-size: calc(70 * var(--u));
+  background: #D2D2D2;
+}
+.allocation__tick {
+  position: absolute;
+  top: calc(160 * var(--u));
+  left: calc(var(--x) * var(--u));
+  font-size: calc(12 * var(--u));
+  line-height: 1;
+  letter-spacing: var(--track-narrow);
+  color: var(--white);
+}
+
+/* --------------------------------------------------------------------------
+   16. Radar
+   Artboard: 275 x 250. Seven axes — Jan to Jul — over five rings.
+   -------------------------------------------------------------------------- */
+.radar {
+  inline-size: calc(275 * var(--u));
+  block-size: calc(250 * var(--u));
+}
+.radar > svg {
+  inline-size: 100%;
+  block-size: 100%;
+  overflow: visible;
+}
+.radar__rings path {
+  fill: none;
+  stroke: #383838;
+  stroke-width: 1.202;
+}
+.radar__area2 {
+  fill: rgba(255, 255, 255, 0.2);
+  stroke: rgba(255, 255, 255, 0.1);
+}
+.radar__area1 {
+  fill: none;
+  stroke: #4AFAA9;
+  stroke-width: 2;
+}
+.radar__months text {
+  fill: #C6C6C6;
+  font-family: 'DM Sans', var(--font-sans);
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: -0.02em;
+  text-anchor: middle;
+}
+
+/* Artboard: chips at x120.5 / y25 of the radar, 12 units tall, 32 apart. */
+.radar__chips {
+  position: absolute;
+  left: calc(120.5 * var(--u));
+  top: calc(25 * var(--u));
+}
+.radar__chips li {
+  position: absolute;
+  top: calc(var(--y) * var(--u));
+  display: flex;
+  align-items: center;
+  padding: calc(2 * var(--u)) calc(4 * var(--u));
+  border-radius: calc(6 * var(--u));
+  background: #32A7D4;
+  font-family: 'DM Sans', var(--font-sans);
+  font-weight: 500;
+  font-size: calc(12 * var(--u));
+  line-height: 1;
+  letter-spacing: var(--track-narrow);
+  color: var(--white);
+  white-space: nowrap;
+}

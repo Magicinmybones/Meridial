@@ -8,10 +8,15 @@ stacks a second section and re-runs the parts that must still hold.
 ## What is asserted
 
 1. `scrollWidth == clientWidth` — no horizontal scrollbar, at any width
-2. `scrollHeight <= clientHeight` — the hero alone is exactly one screen
-3. The hero spans `left === 0` to `right === innerWidth` — full bleed
+2. `scrollHeight == clientHeight x <sections>` — every section owns exactly
+   one screen, and the page is their sum
+3. Each section spans `left === 0` to `right === clientWidth` — full bleed.
+   Comparisons use the layout viewport, not `innerWidth`: once the page is
+   taller than one screen a scrollbar exists, and `innerWidth` still counts
+   the space it takes
 4. The glow's right edge equals the viewport's right edge — no dead band
-5. The panel holds 35.43% of the shell — the artboard's 569-of-1606 split
+5. The hero panel holds 35.43% of the shell — the artboard's 569-of-1606
+   split — and the signal board holds 328 / 407 / 407 across its columns
 6. Sampled pixels prove the glow *paints* to the right edge, not merely
    measures to it
 7. No console errors, no failed requests
@@ -48,6 +53,17 @@ designed rather than stretched and still shows no letterbox.
 **The type scale is unchanged.** `--u` and every computed font size match the
 previous build exactly at all nine viewports, which confirms the change is
 layout-only and leaves the typography untouched.
+
+## The signal section
+
+Section two passes the same nine viewports. Measured at 1920 x 1080 it spans
+y1080 to y2160 — exactly one viewport, immediately after the hero — and its
+board columns measure 393.19 / 487.89 / 487.89, a ratio of 0.8059 against the
+artboard's 328 / 407 = 0.8059.
+
+Both sections together make the page exactly two viewports tall, with no
+scrollbar in either axis beyond the single vertical one the second section
+necessarily introduces.
 
 ## Fidelity to the artboard
 

@@ -1,11 +1,11 @@
 # Meridial
 
-The Meridial hero, built from the source Figma document as plain HTML, CSS and
-vanilla JavaScript. No frameworks, no build step, no dependencies — open
+The Meridial landing page, built from the source Figma documents as plain HTML,
+CSS and vanilla JavaScript. No frameworks, no build step, no dependencies — open
 `src/index.html` and it runs.
 
-The hero fills exactly one screen at any desktop viewport, edge to edge, with
-no breakpoints: columns are proportions of the viewport, vertical space is
+Two sections — the hero and the signal board — each fill exactly one screen at
+any desktop viewport, edge to edge, with no breakpoints: columns are proportions of the viewport, vertical space is
 distributed, and a single design unit — artboard numbers read out of the `.fig`
 node graph — carries the type scale. See
 [docs/design-unit.md](docs/design-unit.md).
@@ -27,12 +27,12 @@ browsers.
 
 ```
 src/                       the site — this directory is what gets deployed
-  index.html               single page; the hero artboard
-  css/style.css            all styling, organised in ten numbered sections
+  index.html               single page; the hero and signal artboards
+  css/style.css            all styling, organised in numbered sections
   js/main.js               chart backdrop + marquee measurement
   assets/
-    fonts/                 Geist woff2 (Suisse Intl stand-in)
-    images/                gradient-08.png — the panel glow
+    fonts/                 Geist woff2 (Suisse Intl stand-in), DM Sans
+    images/                the hero glow and the signal wash
     logos/
       meridial-mark.svg    the Meridial mark, standalone
       favicon.svg          the same mark on the hero's top surface colour

@@ -32,3 +32,37 @@ presentation chrome and is not part of the site; only the artboard is built.
 - **The chart** is Figma's own vector data. The area is the fill geometry
   verbatim; the line is its centreline, recovered by reversing the cubic chain
   along the shape's top edge, so line and fill share exact control points.
+
+## The signal section
+
+A second `.fig` supplied the signal section. Same container format; parsing it
+yielded 917 nodes and 295 blobs.
+
+Vector geometry comes from each node's `fillGeometry` / `strokeGeometry`
+command blobs — a byte stream of one-byte opcodes followed by little-endian
+float32 arguments (`0` close, `1` move, `2` line, `3` quadratic, `4` cubic), in
+the node's own coordinate space. All 43 geometry blobs in the section decode,
+so every path in the radar, the trend chart and the asset bars is the file's
+own geometry rather than a redrawing.
+
+- **The chart line** is again the fill shape's centreline, recovered by
+  reversing the cubic chain along its top edge, so line and fill share exact
+  control points. It is 260 units wide here against the hero's 290 — the same
+  component drawn narrower, reproduced as drawn.
+- **The hatch** on the asset bars and the radar area is the file's own
+  pattern: 2-unit stripes of `#E7E7E7` on a 4-unit period, rotated -20.209°,
+  rebuilt as a CSS repeating gradient and an SVG pattern rather than as 144
+  individual stripe rectangles.
+- **The radar chips** resolve through their component instances to
+  `Size=Small, Type=Primary` — `#32A7D4` with white DM Sans, the one piece of
+  colour in an otherwise monochrome design. Reproduced as found.
+- **The wash** carries two stacked 3 MB image fills. The upper one is opaque
+  RGB drawn to cover, so the lower is 100% occluded and omitted — the same
+  judgement made for `gradient-01` in the hero, and 3.18 MB saved.
+- **DM Sans Medium** is a second face, used only for the radar's month axis
+  and chips. It is openly licensed, so unlike Suisse Intl it ships with the
+  site rather than standing in.
+
+Two outer frames in the file — a backdrop image and a presentation rectangle —
+are shot chrome and are not part of the site. Both are marked invisible in the
+source and are not built.
