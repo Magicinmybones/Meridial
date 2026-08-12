@@ -130,8 +130,11 @@ def check(d, stacked=False):
     f = []
     vw, vh, cw = d["vw"], d["vh"], d["clientW"]
 
+    # The site is one screen and never scrolls, in either axis.
     if d["scrollW"] > cw:
         f.append(f"h-scroll ({d['scrollW']}>{cw})")
+    if d["scrollH"] > d["clientH"] + 1:
+        f.append(f"v-scroll ({d['scrollH']}>{d['clientH']}) — the page must not scroll")
 
     # Each section still settles to exactly one viewport. The page is taller
     # than the sum of them now: the signal section is pinned inside a track that

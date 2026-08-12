@@ -97,33 +97,36 @@ stylesheet still owes, and §10 is where it belongs.
 
 ## Motion
 
-Timings come from the reference recording — 574 frames at 60fps — measured
-rather than eyeballed: per-element luminance curves give each reveal's start,
-midpoint and end to within a frame. They live in one place, §17 of the
-stylesheet.
+**The site never scrolls.** It is one screen, `overflow: hidden`, with both
+sections stacked on it. Moving between them is a transition, not a scroll
+position, so no scrollbar exists in either axis — the harness asserts
+`scrollHeight <= clientHeight` as well as the horizontal case.
 
-The reveal is opacity only. The title's luminance centroid holds steady at ~123
-through the recorded reveal, so nothing travels into place; adding a rise would
-have been an invention.
+The hero plays itself in on load. Delays and durations were measured off the
+reference recording frame by frame at 60fps and live in §17.
 
-The transition between the sections is not a scroll. Tracking the bright region
-across frames 262→332 shows the hero's glow expanding from x227–249 to the full
-width, while the hero's two panel cards travel into the board's first column —
-the same elements in both artboards. It is reproduced as a scroll-scrubbed
-morph over one screen of pinned scroll, with both ends measured at runtime.
+The move between the sections reproduces the mechanic rather than the frames:
+the hero panel's background expands out of the right column until it owns the
+screen, its two cards travel left into the board's first column, the hero's own
+column clears to the left, and the rest of the board arrives once the cards
+have landed. One second, matching the recording.
 
-Asserted at each viewport, by scrubbing the morph to 0, 0.5 and 1:
+At rest the two sections coincide element for element — the signal wash carries
+the hero glow's transform, its first column carries the hero panel's — which is
+what makes the handover invisible. Measured at 1920x1080:
 
-| viewport | column one at 0 | at 1 | settled layout |
-|---|---|---|---|
-| 1920×1080 | x1415 w305 | x255 w393 | x255 w393 |
-| 1366×768 | x1003 w217 | x181 w279 | x181 w279 |
+| | rest | settled |
+|---|---|---|
+| wash | x1239.8 w680.3 (the hero glow) | x0 w1920 |
+| column one | x1427.3 w305.1 (the hero panel) | x256.9 w396.4 |
 
-The morph lands exactly on the settled layout, and the layout assertions above
-still pass unchanged — the animation moves nothing permanently.
+The script only measures and switches a class; the travel is a CSS transition,
+so the browser interpolates and nothing is tweened frame by frame.
 
-**A regression worth recording.** Animating opacity on the title's three lines
+**Two faults worth recording.** Animating opacity on the title's three lines
 gives each its own stacking context, and a composited child cannot show through
-an ancestor's `background-clip: text`: the headline vanished entirely. Each line
-now carries its own slice of the gradient, sized to three line-heights and
-stepped 0% / 50% / 100%, which reproduces the single wash exactly.
+an ancestor's `background-clip: text` — the headline vanished entirely. Each
+line now carries its own slice of the gradient. And measuring means clearing
+the transform and reading geometry back, which flushes style: without
+suppressing the transition across the measurement the browser treated the
+cleared value as a starting point and animated into the rest position on load.
