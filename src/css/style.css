@@ -672,9 +672,10 @@ img, svg { display: block; }
 
 /* --------------------------------------------------------------------------
    11. Signal shell — section two
-   Artboard: a 1567 x 1117 wash inset in the 1606 x 1161 board. The inset is
-   held as a proportion of the shell, so the wash fills the viewport the way
-   the hero does; everything inside it is sized in units.
+   Artboard: the same 1606 x 1161 board as the hero. A 1573 x 1138 wash sits at
+   x11/y8 inside it, with the masthead, the dashboard and the closing line laid
+   on top at their artboard coordinates. Widths are proportions of the shell so
+   the section fills the viewport; heights are units.
    -------------------------------------------------------------------------- */
 .section--signal {
   display: flex;
@@ -687,8 +688,9 @@ img, svg { display: block; }
 
 .signal {
   position: relative;
-  inline-size: calc(min(100%, var(--shell-max)) * 1567 / var(--artboard-w));
-  block-size: calc(1117 * var(--u));
+  inline-size: 100%;
+  max-inline-size: var(--shell-max);
+  block-size: calc(var(--artboard-h) * var(--u));
   margin-inline: auto;
 }
 
@@ -696,17 +698,30 @@ img, svg { display: block; }
    opaque and drawn to cover, so the lower is fully occluded and omitted. */
 .signal__wash {
   position: absolute;
-  inset: 0;
+  left: calc(100% * 11 / var(--artboard-w));
+  inline-size: calc(100% * 1573 / var(--artboard-w));
+  top: calc(8 * var(--u));
+  block-size: calc(1138 * var(--u));
   border-radius: calc(10 * var(--u));
   border: var(--hairline) solid rgba(255, 255, 255, 0.1);
   background: #ffffff url('../assets/images/signal-backdrop.png') center / cover no-repeat;
   opacity: 0.2;
 }
 
-/* Artboard: 847 units, centred on the wash. */
+/* Artboard: brand at x34, navigation centred on the board's own centre, call
+   to action ending 43.34 from the right. Unlike the hero's, this masthead
+   spans the full width — the same three-track grid does both. */
+.signal__masthead {
+  position: absolute;
+  left: calc(100% * 34 / var(--artboard-w));
+  right: calc(100% * 43.34 / var(--artboard-w));
+  top: calc(46 * var(--u));
+}
+
+/* Artboard: 847 units, centred. */
 .signal__title {
   position: absolute;
-  top: calc(959 * var(--u));
+  top: calc(1008 * var(--u));
   left: 0;
   right: 0;
   margin: 0;
@@ -722,14 +737,14 @@ img, svg { display: block; }
 
 /* --------------------------------------------------------------------------
    12. Board
-   Artboard: 1198 x 689 at x100 of the wash — left of centre, which is the
-   design. Columns hold the artboard's 328 / 407 / 407 as proportions.
+   Artboard: 1198 x 689 at x204/y236 of the board — very nearly centred, 204
+   against 204 on the right. Columns hold the artboard's 328 / 407 / 407.
    -------------------------------------------------------------------------- */
 .board {
   position: absolute;
-  top: calc(179 * var(--u));
-  left: calc(100% * 100 / 1567);
-  inline-size: calc(100% * 1198 / 1567);
+  top: calc(236 * var(--u));
+  left: calc(100% * 204 / var(--artboard-w));
+  inline-size: calc(100% * 1198 / var(--artboard-w));
   block-size: calc(689 * var(--u));
   display: flex;
   padding: calc(13 * var(--u)) calc(20 * var(--u)) calc(15 * var(--u)) calc(14 * var(--u));
