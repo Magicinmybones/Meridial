@@ -1,0 +1,611 @@
+/* ==========================================================================
+   Meridial
+   --------------------------------------------------------------------------
+   Every measurement in this file is stated in *artboard units* — the numbers
+   read directly out of the Figma document — and multiplied by `--u`, the
+   length that one artboard unit occupies on screen. Nothing is expressed in
+   fixed pixels, so the composition holds its proportions at any viewport and
+   new sections can reuse the same unit.
+
+   Scope: laptop and desktop. Tablet and handheld are deliberately not
+   addressed yet; see §10.
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Typeface
+   The artboard is set in Suisse Intl — Regular for body and UI, Book for the
+   panel heading. Drop the licensed files into assets/fonts/ and uncomment the
+   two rules below; the stack already prefers them, so nothing else changes.
+
+   @font-face {
+     font-family: 'Suisse Intl';
+     src: url('../assets/fonts/SuisseIntl-Regular.otf') format('opentype');
+     font-weight: 400;
+     font-style: normal;
+     font-display: swap;
+   }
+   @font-face {
+     font-family: 'Suisse Intl';
+     src: url('../assets/fonts/SuisseIntl-Book.otf') format('opentype');
+     font-weight: 500;
+     font-style: normal;
+     font-display: swap;
+   }
+
+   Until then Geist stands in — it is the closest open face by measured
+   advance width (see docs/typography.md).
+   -------------------------------------------------------------------------- */
+@font-face {
+  font-family: 'Geist';
+  src: url('../assets/fonts/geist-latin-400-normal.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Geist';
+  src: url('../assets/fonts/geist-latin-500-normal.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* --------------------------------------------------------------------------
+   2. Tokens
+   -------------------------------------------------------------------------- */
+:root {
+  /* --- artboard ------------------------------------------------------- */
+  --artboard-w: 1606;      /* hero artboard width,  in units */
+  --artboard-h: 1161;      /* hero artboard height, in units */
+  --column-content: 1037;  /* left column,  in units */
+  --column-panel: 569;     /* right column, in units */
+
+  /* --- the design unit -------------------------------------------------
+     One artboard unit on screen. Taking the smaller of the two viewport
+     ratios makes the artboard *contain* itself: the hero always fits in one
+     screen, in both axes, without a scrollbar. The upper bound stops the
+     composition from ballooning on very tall displays. */
+  --u: min(
+    calc(100vh / var(--artboard-h)),
+    calc(100vw / var(--artboard-w)),
+    1.35px
+  );
+
+  /* --- hairlines -------------------------------------------------------
+     1-unit strokes would land below one device pixel at most scales and
+     render inconsistently, so they hold a one-pixel floor. */
+  --hairline: max(1px, calc(1 * var(--u)));
+
+  /* --- colour ---------------------------------------------------------- */
+  --surface-top: #06080A;
+  --surface-bottom: #191919;
+  --white: #ffffff;
+  --text-muted: #c1c1c1;
+  --ink: #111111;
+  --ink-strong: #000000;
+  --fade: #161617;
+
+  /* --- radii ----------------------------------------------------------- */
+  --radius-card: calc(25 * var(--u));
+  --radius-control: calc(3 * var(--u));
+  --radius-glow: calc(10 * var(--u));
+
+  /* --- type ------------------------------------------------------------ */
+  --font-sans: 'Suisse Intl', 'Geist', 'Helvetica Neue', Arial, sans-serif;
+
+  /* Tracking is expressed as a ratio of the type size, exactly as Figma
+     stores it, so it needs no scaling. */
+  --track-tight: -0.04em;   /* -4%  display and captions */
+  --track-snug: -0.03em;    /* -3%  navigation */
+  --track-narrow: -0.02em;  /* -2%  figures and controls */
+  --track-wide: 0.07em;     /*  7%  uppercase labels */
+}
+
+/* --------------------------------------------------------------------------
+   3. Base
+   -------------------------------------------------------------------------- */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-weight: 400;
+  color: var(--white);
+  background: var(--surface-bottom);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: geometricPrecision;
+}
+
+p, h1, ul { margin: 0; }
+ul { padding: 0; list-style: none; }
+a { color: inherit; text-decoration: none; }
+img, svg { display: block; }
+
+/* --------------------------------------------------------------------------
+   4. Hero shell
+   The section owns one screen; the artboard sits centred inside it. The
+   background bleeds the full width, so the artboard's own width reads as a
+   centred container rather than as letterboxing.
+   -------------------------------------------------------------------------- */
+.hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--surface-top) 0%, var(--surface-bottom) 100%);
+}
+
+.hero__canvas {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  width: calc(var(--artboard-w) * var(--u));
+  height: calc(var(--artboard-h) * var(--u));
+}
+
+.hero__content {
+  flex: 0 0 calc(var(--column-content) * var(--u));
+  min-width: 0;
+}
+
+.hero__panel {
+  position: relative;
+  flex: 0 0 calc(var(--column-panel) * var(--u));
+  align-self: stretch;
+}
+
+/* --------------------------------------------------------------------------
+   5. Masthead
+   Artboard: brand at x35/y46, navigation at x318/y48, call to action at
+   x873/y38 — all optically centred on y58.
+   -------------------------------------------------------------------------- */
+.masthead {
+  position: relative;
+  height: calc(116 * var(--u));
+}
+
+.brand {
+  position: absolute;
+  left: calc(35 * var(--u));
+  top: calc(46 * var(--u));
+  display: flex;
+  align-items: flex-start;
+  gap: calc(9 * var(--u));
+  height: calc(24 * var(--u));
+}
+.brand__mark {
+  width: calc(29 * var(--u));
+  height: calc(24 * var(--u));
+}
+.brand__mark svg { width: 100%; height: 100%; }
+.brand__name {
+  font-size: calc(23.12195 * var(--u));
+  line-height: 0.99473;                 /* 23 / 23.12195 */
+  letter-spacing: var(--track-tight);
+  color: var(--white);
+}
+
+.mainnav {
+  position: absolute;
+  left: calc(318 * var(--u));
+  top: calc(48 * var(--u));
+}
+.mainnav__list {
+  display: flex;
+  gap: calc(44 * var(--u));
+}
+.mainnav__list a {
+  display: block;
+  font-size: calc(16 * var(--u));
+  line-height: 1.1875;                  /* 19 / 16 */
+  letter-spacing: var(--track-snug);
+  color: var(--white);
+  opacity: 0.5;
+  white-space: pre;                     /* the labels carry authored spaces */
+  transition: opacity 0.2s ease;
+}
+.mainnav__list a:hover,
+.mainnav__list a:focus-visible { opacity: 1; }
+
+.btn-nav {
+  position: absolute;
+  left: calc(873 * var(--u));
+  top: calc(38 * var(--u));
+  display: flex;
+  align-items: center;
+  padding: calc(10.37 * var(--u)) calc(15.83 * var(--u));
+  border-radius: var(--radius-control);
+  background: var(--white);
+  color: var(--ink);
+  font-size: calc(16 * var(--u));
+  line-height: 1.1875;
+  letter-spacing: var(--track-snug);
+  transition: background-color 0.2s ease;
+}
+.btn-nav:hover,
+.btn-nav:focus-visible { background: #e6e6e6; }
+
+/* --------------------------------------------------------------------------
+   6. Hero body
+   Artboard: an 842-unit block at x99/y282. Stack is head, 54, subtitle,
+   54, actions.
+   -------------------------------------------------------------------------- */
+.hero__body {
+  width: calc(842 * var(--u));
+  margin: calc(166 * var(--u)) 0 0 calc(99 * var(--u));
+  text-align: center;
+}
+
+.hero__head { margin-bottom: calc(54 * var(--u)); }
+
+/* Eyebrow — gradient wash inside a 1-unit gradient hairline. The artboard
+   draws it with square corners. */
+.pill {
+  position: relative;
+  display: block;
+  width: calc(279 * var(--u));
+  margin-inline: auto;
+  padding: calc(10 * var(--u));
+  text-align: left;
+  font-size: calc(12 * var(--u));
+  line-height: 1.08333;                 /* 13 / 12 */
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--white);
+  background: linear-gradient(90deg,
+    rgba(153, 153, 153, 0.1) 0%,
+    rgba(255, 255, 255, 0.2) 45.55%,
+    rgba(153, 153, 153, 0.1) 100%);
+}
+.pill::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: var(--hairline);
+  background: linear-gradient(90deg,
+    rgba(152, 152, 152, 0.1) 0%,
+    rgba(102, 102, 102, 0.1) 100%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* Display — 96/96, -4% tracking, white-to-grey vertical wash.
+   The box is the artboard's 842 less one trailing tracking step: CSS adds
+   letter-spacing after a line's last glyph where Figma does not, and without
+   the deduction every centred line would sit half a step to the right. */
+.hero__title {
+  width: calc((842 - 96 * 0.04) * var(--u));
+  margin: calc(45 * var(--u)) 0 0;
+  font-size: calc(96 * var(--u));
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: var(--track-tight);
+  background: linear-gradient(180deg, #ffffff 0%, #999999 100%);
+  -webkit-background-clip: text;
+          background-clip: text;
+  color: transparent;
+}
+
+.hero__sub {
+  width: calc((472 - 20 * 0.04) * var(--u));
+  margin-left: calc(185 * var(--u));
+  font-size: calc(20 * var(--u));
+  line-height: 1.4;
+  letter-spacing: var(--track-tight);
+  color: var(--text-muted);
+}
+
+.hero__actions {
+  display: flex;
+  gap: calc(18 * var(--u));
+  width: calc(372 * var(--u));
+  margin: calc(54 * var(--u)) 0 0 calc(235 * var(--u));
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(177 * var(--u));
+  height: calc(62 * var(--u));
+  border-radius: var(--radius-control);
+  font-size: calc(18 * var(--u));
+  line-height: 1;
+  letter-spacing: var(--track-narrow);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+.btn--solid {
+  background: var(--white);
+  color: var(--ink-strong);
+}
+.btn--solid:hover,
+.btn--solid:focus-visible { background: #e6e6e6; }
+
+.btn--ghost {
+  border: var(--hairline) solid rgba(255, 255, 255, 0.1);
+  color: var(--white);
+}
+.btn--ghost:hover,
+.btn--ghost:focus-visible { border-color: rgba(255, 255, 255, 0.35); }
+
+/* --------------------------------------------------------------------------
+   7. Trusted-by marquee
+   Artboard: a 645 x 106 group at x193/y996. A 606-unit clipping frame holds a
+   1239-unit row carrying the five marks twice, one cycle apart.
+   -------------------------------------------------------------------------- */
+.trusted {
+  position: relative;
+  width: calc(645 * var(--u));
+  height: calc(106 * var(--u));
+  margin: calc(122 * var(--u)) 0 0 calc(193 * var(--u));
+}
+
+.trusted__label {
+  width: calc((227 + 12 * 0.07) * var(--u));
+  margin-left: calc(214 * var(--u));
+  font-size: calc(12 * var(--u));
+  line-height: 1.08333;
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  text-align: center;
+  white-space: nowrap;
+  color: var(--white);
+  opacity: 0.4;
+}
+
+.marquee {
+  width: calc(606 * var(--u));
+  height: calc(25.351 * var(--u));
+  margin: calc(44 * var(--u)) 0 0 calc(39 * var(--u));
+  overflow: hidden;
+  opacity: 0.4;
+}
+
+.marquee__track {
+  --marquee-shift: calc(-644.104 * var(--u));  /* set precisely by script.js */
+  display: flex;
+  align-items: center;
+  gap: calc(49 * var(--u));
+  width: max-content;
+  height: 100%;
+  animation: marquee-scroll 32s linear infinite;
+}
+.marquee:hover .marquee__track { animation-play-state: paused; }
+
+@keyframes marquee-scroll {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(var(--marquee-shift), 0, 0); }
+}
+
+.marquee__logo { flex: none; }
+.marquee__logo--intel  { width: calc(52.015 * var(--u)); height: calc(21.940 * var(--u)); }
+.marquee__logo--google { width: calc(77.195 * var(--u)); height: calc(25.351 * var(--u)); }
+.marquee__logo--sony   { width: calc(96.000 * var(--u)); height: calc(17.000 * var(--u)); }
+.marquee__logo--amazon { width: calc(80.446 * var(--u)); height: calc(24.151 * var(--u)); }
+.marquee__logo--adobe  { width: calc(93.448 * var(--u)); height: calc(24.766 * var(--u)); }
+
+.marquee__fade {
+  position: absolute;
+  top: calc(30 * var(--u));
+  width: calc(112 * var(--u));
+  height: calc(76 * var(--u));
+  pointer-events: none;
+}
+.marquee__fade--start {
+  left: 0;
+  background: linear-gradient(90deg, var(--fade) 31.71%, rgba(22, 22, 23, 0) 93.33%);
+}
+.marquee__fade--end {
+  left: calc(542 * var(--u));
+  background: linear-gradient(270deg, var(--fade) 31.71%, rgba(22, 22, 23, 0) 93.33%);
+}
+
+/* --------------------------------------------------------------------------
+   8. Panel column
+   Artboard: glow at x0/y20 within the column; cards at x114/y213.
+   -------------------------------------------------------------------------- */
+
+/* The wash is the source bitmap with Figma's vibrance at -100, which resolves
+   fully desaturated; the filter reproduces that without altering the asset. */
+.glow {
+  position: absolute;
+  left: 0;
+  top: calc(20 * var(--u));
+  width: calc(549 * var(--u));
+  height: calc(1117 * var(--u));
+  border-radius: var(--radius-glow);
+  background: #ffffff url('../assets/images/gradient-08.png') center / cover no-repeat;
+  filter: grayscale(1);
+}
+
+.panel {
+  position: relative;
+  width: calc(328 * var(--u));
+  margin: calc(213 * var(--u)) 0 0 calc(114 * var(--u));
+}
+
+.card {
+  position: relative;
+  width: 100%;
+  border-radius: var(--radius-card);
+  background: rgba(0, 0, 0, 0.1);
+  -webkit-backdrop-filter: blur(calc(77.65 * var(--u)));
+          backdrop-filter: blur(calc(77.65 * var(--u)));
+}
+/* Inside hairline, gradient at 10%; artboard stroke runs at ~127.6°. */
+.card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: var(--hairline);
+  background: linear-gradient(127.6deg,
+    rgba(0, 0, 0, 0.1) 4.14%,
+    rgba(102, 102, 102, 0.1) 54.67%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+}
+
+.card--allocation { height: calc(386 * var(--u)); }
+.card--value {
+  height: calc(264 * var(--u));
+  margin-top: calc(11 * var(--u));
+}
+
+/* Card children carry their artboard coordinates as unitless --x / --y. */
+.card__item {
+  position: absolute;
+  left: calc(var(--x) * var(--u));
+  top: calc(var(--y) * var(--u));
+  margin: 0;
+}
+
+.dot {
+  width: calc(22 * var(--u));
+  height: calc(22 * var(--u));
+  border-radius: 50%;
+}
+.dot::after {
+  content: '';
+  position: absolute;
+  left: calc(8 * var(--u));
+  top: calc(8 * var(--u));
+  width: calc(6 * var(--u));
+  height: calc(6 * var(--u));
+  border-radius: 50%;
+  background: var(--white);
+}
+.dot--filled { background: rgba(255, 255, 255, 0.11); }
+.dot--hollow { border: var(--hairline) solid rgba(255, 255, 255, 0.1); }
+.dot--hollow::after {
+  left: calc(8 * var(--u) - var(--hairline));
+  top: calc(8 * var(--u) - var(--hairline));
+  opacity: 0.23;
+}
+
+/* Timeline connectors — 1-unit stroke, 2 on / 6 off. */
+.tl-line {
+  width: var(--hairline);
+  height: calc(var(--len) * var(--u));
+  background-image: repeating-linear-gradient(
+    to bottom,
+    var(--white) 0 calc(2 * var(--u)),
+    transparent calc(2 * var(--u)) calc(8 * var(--u)));
+}
+.tl-line--dim { opacity: 0.2; }
+
+.card__label {
+  font-size: calc(12 * var(--u));
+  line-height: 1.08333;
+  letter-spacing: var(--track-wide);
+  text-transform: uppercase;
+  color: var(--white);
+  white-space: nowrap;
+}
+.card__label--dim { opacity: 0.2; }
+
+.stat {
+  font-size: calc(32 * var(--u));
+  line-height: 1;
+  letter-spacing: var(--track-narrow);
+  color: var(--white);
+}
+.stat--sep { opacity: 0.3; }
+
+.stat__unit {
+  font-size: calc(14 * var(--u));
+  line-height: 1;
+  letter-spacing: var(--track-narrow);
+  color: var(--white);
+}
+
+.pill--card {
+  width: calc(152 * var(--u));
+  margin-inline: 0;
+  padding: calc(7 * var(--u)) calc(8 * var(--u));
+  white-space: nowrap;
+}
+
+.card__note {
+  font-size: calc(14 * var(--u));
+  line-height: 1;
+  letter-spacing: var(--track-narrow);
+  color: var(--white);
+  opacity: 0.4;
+  white-space: nowrap;
+}
+
+.value {
+  font-size: calc(32 * var(--u));
+  line-height: 1;
+  letter-spacing: var(--track-narrow);
+  color: var(--white);
+}
+.value__delta {
+  font-size: calc(14 * var(--u));
+  line-height: 1;
+  letter-spacing: var(--track-narrow);
+  color: var(--white);
+}
+
+.chart {
+  width: calc(290 * var(--u));
+  height: calc(117 * var(--u));
+  overflow: visible;
+}
+.chart-grid {
+  width: calc(274 * var(--u));
+  height: calc(120 * var(--u));
+  opacity: 0.45;
+}
+
+.panel__title {
+  width: calc((290 - 28 * 0.04) * var(--u));
+  margin: calc(96 * var(--u)) 0 0 calc(19 * var(--u));
+  font-size: calc(28 * var(--u));
+  font-weight: 500;                     /* Suisse Intl Book */
+  line-height: 1;
+  letter-spacing: var(--track-tight);
+  text-align: center;
+  white-space: nowrap;
+  color: var(--white);
+}
+
+.panel__caption {
+  width: calc((220 - 16 * 0.04) * var(--u));
+  margin: calc(16 * var(--u)) 0 0 calc(56 * var(--u));
+  font-size: calc(16 * var(--u));
+  line-height: 1.375;                   /* 22 / 16 */
+  letter-spacing: var(--track-tight);
+  text-align: center;
+  color: var(--text-muted);
+}
+
+/* --------------------------------------------------------------------------
+   9. Motion preferences
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .marquee__track { animation: none; }
+  *, *::before, *::after { transition-duration: 0.01ms !important; }
+}
+
+/* --------------------------------------------------------------------------
+   10. Viewport scope
+   Laptop and desktop are the supported range. Narrower viewports still render
+   — `--u` simply becomes width-driven and the artboard scales down intact —
+   but no reflow has been designed for them yet. Tablet and handheld layouts
+   belong here when they are specified.
+   -------------------------------------------------------------------------- */

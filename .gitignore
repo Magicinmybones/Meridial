@@ -1,0 +1,19 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.swp
+
+# Logs and local scratch
+*.log
+.cache/
+tmp/
+
+# Licensed typefaces — see docs/typography.md. These are dropped in locally and
+# must not be redistributed through this repository.
+src/assets/fonts/SuisseIntl-*.otf
+src/assets/fonts/SuisseIntl-*.ttf
+src/assets/fonts/SuisseIntl-*.woff2
