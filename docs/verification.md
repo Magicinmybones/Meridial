@@ -119,11 +119,11 @@ curves per frame, not sampled. Times relative to the travel's start (f272):
 | element | behaviour | timing |
 |---|---|---|
 | hero title, subtitle, buttons, marquee | fade out, drifting left | 0–330ms |
-| hero glow / wash edge | sweeps left, decelerating, to own the screen | 0–1070ms |
+| hero glow / wash edge | **widens** left to own the screen — left edge animates, cover crop recomputes, texture revealed not stretched | 0–1070ms |
 | panel cards | travel left with the panel | 0–1000ms |
 | **masthead nav + CTA** | **slide right — never fade** | 150–1000ms |
 | swap of sections | single frame, geometrically aligned | 1000ms |
-| board box | **fades in place** — top edge never moves | 1300–1430ms |
+| board box | full extent appears at once, **fades up over 185ms** after a 170ms hold | 1170–1355ms |
 | columns two & three | fade in | ~1470ms |
 | closing line | fades in **last** | ~1900ms |
 
@@ -137,6 +137,16 @@ Cascade verified with transitions disabled (headless cannot animate them):
 during the travel the nav computes `translateX(334.5px)` and the CTA
 `translateX(661px)` at 1920×1080, the hero body computes opacity 0, the
 masthead stays at 1, and every value returns to rest on the way back.
+
+**The background handover.** The reference keeps the texture at the glow's
+full strength: the settled section-two margins measure 131–146 in luminance,
+where the artboard's 0.2-opacity wash over the dark base would sit near 50.
+The wash is therefore the glow's own declaration at full strength, and the
+glow expands by animating its left edge to the viewport's rather than by
+transform — the cover crop recomputes as it widens, so the texture is
+progressively revealed the way the recording shows instead of being stretched
+2.8×, and at left 0 it renders pixel-identically to the wash it hands over to.
+Verified: glow travels (1239.8, w680.3) → (0, w1920), wash at (0, w1920).
 
 **Not verifiable here.** CSS transitions need produced frames, and headless
 Chromium starves them once the page goes idle. End states, classes and measured

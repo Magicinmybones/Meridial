@@ -121,7 +121,6 @@
       return null;
     }
 
-    var glowTo = 'none';
     var panelTo = 'none';
     var shown = false;
     var timer = 0;
@@ -146,9 +145,7 @@
          it or the browser treats the cleared value as a starting point and
          animates into place on load. */
       root.classList.remove('to-signal');
-      heroGlow.style.transition = 'none';
       heroPanel.style.transition = 'none';
-      heroGlow.style.transform = 'none';
       heroPanel.style.transform = 'none';
 
       var hs = heroSection.getBoundingClientRect();
@@ -158,20 +155,13 @@
       var w = rel(wash, ss);
       var c = rel(col1, ss);
 
-      if (g.width && p.width && w.width && c.width) {
-        /* the glow expands to the signal section's wash — the full screen */
-        glowTo =
-          'translate(' + (w.left - g.left).toFixed(2) + 'px,' +
-                         (w.top - g.top).toFixed(2) + 'px) scale(' +
-          (w.width / g.width).toFixed(4) + ',' +
-          (w.height / g.height).toFixed(4) + ')';
-
-        /* the panel lands on the board's first column; width alone, because
-           scaling both axes independently would stretch the type */
+      if (p.width && c.width) {
+        /* The glow's expansion is pure CSS (left animates to 0); only the
+           panel's travel needs measuring. Translate-only: the two card sets
+           are unit-identical, so there is nothing to scale. */
         panelTo =
           'translate(' + (c.left - p.left).toFixed(2) + 'px,' +
-                         (c.top - p.top).toFixed(2) + 'px) scale(' +
-          (c.width / p.width).toFixed(4) + ')';
+                         (c.top - p.top).toFixed(2) + 'px)';
 
         root.style.setProperty('--hero-out-x',
           (-rel(heroContent || heroSection, hs).width * 0.35).toFixed(1) + 'px');
@@ -195,8 +185,7 @@
       }
 
       place(wasTravelling);
-      void heroGlow.offsetWidth;          /* flush as the new starting point */
-      heroGlow.style.transition = '';
+      void heroPanel.offsetWidth;         /* flush as the new starting point */
       heroPanel.style.transition = '';
 
       if (wasTravelling) root.classList.add('to-signal');
@@ -205,7 +194,6 @@
     }
 
     function place(travelled) {
-      heroGlow.style.transform = travelled ? glowTo : 'none';
       heroPanel.style.transform = travelled ? panelTo : 'none';
     }
 
