@@ -104,31 +104,32 @@ stacked on it. Moving between them is a transition, not a scroll position.
 travel lands; the hero is hidden the moment it takes over. Nothing overlaps and
 nothing is drawn twice.
 
-### The sequence, read frame by frame at 60fps
+### The choreography, tracked per element at 60fps
 
-| frames | duration | what happens |
+Every element was tracked through frames 240-430 — edge-energy and landmark
+curves per frame, not sampled. Times relative to the travel's start (f272):
+
+| element | behaviour | timing |
 |---|---|---|
-| 272–332 | 1000ms | the hero's texture expands to become the second section's background, while its panel carries the two cards left |
-| 332–340 | 130ms | the cards sit settled, **alone** — nothing else on screen |
-| 340–358 | 300ms | the box grows in from its top edge, **behind** the cards |
-| 358–365 | 200ms | the section's own elements arrive inside it |
+| hero title, subtitle, buttons, marquee | fade out, drifting left | 0–330ms |
+| hero glow / wash edge | sweeps left, decelerating, to own the screen | 0–1070ms |
+| panel cards | travel left with the panel | 0–1000ms |
+| **masthead nav + CTA** | **slide right — never fade** | 150–1000ms |
+| swap of sections | single frame, geometrically aligned | 1000ms |
+| board box | grows from its top edge, behind the cards | 1130–1430ms |
+| columns two & three | fade in | ~1470ms |
+| closing line | fades in **last** | ~1900ms |
 
-That hold — the cards alone for eight frames before anything else appears — is
-the part that reads as the cards "arriving", and it only shows up frame by
-frame. Sampling every fourth or sixth frame hides it entirely, which is how it
-was missed on the first three passes.
+The masthead finding is the important one: its navigation slides from the
+hero's column-bound layout to the signal's full-width one (CTA x388→x615 in
+the 720-wide reference), handing over at the swap. Both deltas are measured
+from the two laid-out mastheads at runtime — nothing is hardcoded, so the
+slide is correct at every viewport.
 
-The box is a layer of its own (`.board::before`) rather than the element's own
-background, so growing it cannot squash the column standing on top of it, and
-the cards keep their stacking above it.
-
-Verified state by state at 1920x1080:
-
-| | rest | after the swap |
-|---|---|---|
-| signal section | hidden | visible |
-| hero section | visible | hidden |
-| board column one | hidden (the hero's panel stands in) | visible |
+Cascade verified with transitions disabled (headless cannot animate them):
+during the travel the nav computes `translateX(334.5px)` and the CTA
+`translateX(661px)` at 1920×1080, the hero body computes opacity 0, the
+masthead stays at 1, and every value returns to rest on the way back.
 
 **Not verifiable here.** CSS transitions need produced frames, and headless
 Chromium starves them once the page goes idle. End states, classes and measured

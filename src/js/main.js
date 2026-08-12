@@ -111,6 +111,10 @@
     var heroGlow = document.querySelector('[data-hero-glow]');
     var heroPanel = document.querySelector('[data-hero-panel]');
     var heroContent = document.querySelector('.hero__content');
+    var heroNav = document.querySelector('.section--hero .mainnav');
+    var heroCta = document.querySelector('.section--hero .btn-nav');
+    var sigNav = document.querySelector('.signal__masthead .mainnav');
+    var sigCta = document.querySelector('.signal__masthead .btn-nav');
     var wash = document.querySelector('[data-signal-wash]');
     var col1 = document.querySelector('[data-board-col1]');
     if (!(heroSection && signalSection && heroGlow && heroPanel && wash && col1)) {
@@ -171,6 +175,23 @@
 
         root.style.setProperty('--hero-out-x',
           (-rel(heroContent || heroSection, hs).width * 0.35).toFixed(1) + 'px');
+      }
+
+      /* The masthead's navigation and call-to-action slide from the hero's
+         layout to the signal's, so the swap hands one masthead to the other
+         mid-gesture. Their travel is the difference between the two layouts,
+         measured the same way as everything else. */
+      if (heroNav && sigNav && heroCta && sigCta) {
+        /* inline only for the measurement — an inline 'none' left behind
+           would outweigh the class rule that slides them */
+        heroNav.style.transform = 'none';
+        heroCta.style.transform = 'none';
+        var dNav = rel(sigNav, ss).left - rel(heroNav, hs).left;
+        var dCta = rel(sigCta, ss).left - rel(heroCta, hs).left;
+        heroNav.style.transform = '';
+        heroCta.style.transform = '';
+        root.style.setProperty('--nav-dx', dNav.toFixed(1) + 'px');
+        root.style.setProperty('--cta-dx', dCta.toFixed(1) + 'px');
       }
 
       place(wasTravelling);

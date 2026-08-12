@@ -1085,14 +1085,29 @@ img, svg { display: block; }
   will-change: transform;
 }
 
-.morph-ready .hero__content {
-  transition: opacity calc(var(--morph-dur) * 0.55) var(--morph-ease),
-              transform calc(var(--morph-dur) * 0.7) var(--morph-ease);
+/* The recording keeps the masthead on screen through the whole travel — its
+   navigation and call-to-action slide right, from the hero's column-bound
+   layout to the signal section's full-width one, and hand over at the swap.
+   Only the hero's body and marquee clear out, and they go fast: the title's
+   edge energy collapses within twenty frames. */
+.morph-ready .hero__body,
+.morph-ready .trusted {
+  transition: opacity 330ms var(--morph-ease),
+              transform 500ms var(--morph-ease);
 }
-.to-signal .hero__content {
+.to-signal .hero__body,
+.to-signal .trusted {
   opacity: 0;
   transform: translateX(var(--hero-out-x, -12vw));
 }
+
+.morph-ready .section--hero .mainnav,
+.morph-ready .section--hero .btn-nav {
+  transition: transform 850ms var(--morph-ease) 150ms;
+  will-change: transform;
+}
+.to-signal .section--hero .mainnav { transform: translateX(var(--nav-dx, 0px)); }
+.to-signal .section--hero .btn-nav { transform: translateX(var(--cta-dx, 0px)); }
 
 /* The board's first column is a spacer while the travel runs: the hero's panel
    stands in its place, so painting it too would double the cards. */
@@ -1132,20 +1147,21 @@ img, svg { display: block; }
 
 .morph-ready [data-reveal='board-mid'],
 .morph-ready [data-reveal='board-end'],
-.morph-ready [data-reveal='signal-title'],
-.morph-ready [data-reveal='signal-masthead'] {
+.morph-ready [data-reveal='signal-title'] {
   animation: none;
   opacity: 0;
 }
+/* The signal masthead is not revealed — it is the hero's masthead, handed
+   over mid-slide at the swap. It must be there the moment the section is. */
+.morph-ready [data-reveal='signal-masthead'] { animation: none; opacity: 1; }
 .signal-in [data-reveal='board-mid'],
 .signal-in [data-reveal='board-end'],
-.signal-in [data-reveal='signal-title'],
-.signal-in [data-reveal='signal-masthead'] {
+.signal-in [data-reveal='signal-title'] {
   opacity: 1;
-  transition: opacity 200ms var(--morph-ease) 430ms;
+  transition: opacity 200ms var(--morph-ease) 340ms;
 }
-.signal-in [data-reveal='signal-masthead'] { transition-delay: 380ms; }
-.signal-in [data-reveal='signal-title'] { transition-delay: 500ms; }
+/* The closing line is the last thing to arrive, well after the columns. */
+.signal-in [data-reveal='signal-title'] { transition-delay: 850ms; }
 
 /* --------------------------------------------------------------------------
    19. Motion preferences, continued
