@@ -14,13 +14,19 @@
 
   <!-- ====================================================================
        HERO
-       Reproduces the 1606 x 1161 artboard, scaled to fit the viewport.
-       Further sections are added as siblings of this one.
+       One viewport tall, full bleed. The artboard's 1037 / 569 split is held
+       as a proportion rather than a pixel width, so the composition fills any
+       desktop viewport. Further sections are added as siblings, using the
+       same .section shell.
        ==================================================================== -->
-  <section class="hero" id="hero">
-    <div class="hero__canvas">
+  <section class="section section--hero" id="hero">
 
-      <!-- ---------- content column (1037 of 1606) ---------- -->
+    <!-- Bleeds past the shell to the viewport's right edge. -->
+    <div class="hero__glow" aria-hidden="true"></div>
+
+    <div class="hero__grid">
+
+      <!-- ---------- content column ---------- -->
       <div class="hero__content">
 
         <header class="masthead">
@@ -96,16 +102,11 @@
               <img class="marquee__logo marquee__logo--adobe"  src="assets/logos/brands/adobe.svg"  alt="" aria-hidden="true">
             </div>
           </div>
-
-          <span class="marquee__fade marquee__fade--start" aria-hidden="true"></span>
-          <span class="marquee__fade marquee__fade--end" aria-hidden="true"></span>
         </section>
       </div>
 
-      <!-- ---------- panel column (569 of 1606) ---------- -->
+      <!-- ---------- panel column ---------- -->
       <div class="hero__panel">
-        <div class="glow" aria-hidden="true"></div>
-
         <div class="panel">
 
           <article class="card card--allocation">

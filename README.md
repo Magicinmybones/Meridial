@@ -4,9 +4,11 @@ The Meridial hero, built from the source Figma document as plain HTML, CSS and
 vanilla JavaScript. No frameworks, no build step, no dependencies — open
 `src/index.html` and it runs.
 
-Every measurement in the stylesheet is stated in *artboard units* read out of
-the `.fig` node graph and multiplied by a single design unit, so the
-composition holds its proportions at any viewport.
+The hero fills exactly one screen at any desktop viewport, edge to edge, with
+no breakpoints: columns are proportions of the viewport, vertical space is
+distributed, and a single design unit — artboard numbers read out of the `.fig`
+node graph — carries the type scale. See
+[docs/design-unit.md](docs/design-unit.md).
 
 ## Quick start
 
@@ -37,13 +39,26 @@ src/                       the site — this directory is what gets deployed
       brands/              customer logos used in the marquee
 
 docs/                      design and provenance notes
-  design-unit.md           how `--u` works and how to add a section
+  design-unit.md           scale vs layout, and how to add a section
   typography.md            swapping Geist for licensed Suisse Intl
   provenance.md            how the assets were extracted from the .fig
-  verification.md          measured accuracy against the artboard
+  verification.md          measured behaviour across nine viewports
+
+tools/
+  verify-layout.py         headless-Chromium layout assertions
 
 .github/workflows/         GitHub Pages deployment
 ```
+
+## Verifying a change
+
+```bash
+python3 tools/verify-layout.py            # assert layout at nine viewports
+python3 tools/verify-layout.py --shots    # + screenshots and pixel checks
+python3 tools/verify-layout.py --sections # + prove sections stack cleanly
+```
+
+Standard library only; it finds Chromium on `PATH`, or set `CHROME=`.
 
 ## Deployment
 
@@ -59,9 +74,10 @@ Any other static host works the same way: point it at `src/`.
 
 ## Working on it
 
-- **Adding a section.** Read the numbers out of Figma and multiply them by
-  `--u`; see [docs/design-unit.md](docs/design-unit.md). New sections are
-  siblings of `.hero` and reuse the same unit and colour tokens.
+- **Adding a section.** Add a `<section class="section">` sibling and lay it out
+  in a shell capped at `--shell-max`, the way `.hero__grid` does. Sizes come
+  from Figma multiplied by `--u`; structure uses fractions and auto margins,
+  never fixed offsets. See [docs/design-unit.md](docs/design-unit.md).
 - **Typeface.** The artboard is set in Suisse Intl, a commercial face that
   cannot be redistributed. Geist stands in until the licensed files are
   dropped in — see [docs/typography.md](docs/typography.md).

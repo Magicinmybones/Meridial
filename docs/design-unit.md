@@ -1,20 +1,30 @@
 # The design unit
 
-The artboard is 1606 × 1161. Rather than hardcode pixels, the stylesheet states
-every measurement in **artboard units** — the numbers read out of the Figma
-document — multiplied by `--u`, the length one unit occupies on screen:
+Two things scale independently in this stylesheet, and keeping them separate
+is what lets the hero fill any screen without a breakpoint.
+
+- **`--u`, the design unit, is a *scale*.** It sizes type, controls, radii and
+  card geometry — nothing else.
+- **Structure is proportion.** Columns are fractions of the viewport, and
+  vertical space is distributed rather than assigned.
+
+Mixing the two is what produced the original bug: the artboard was rebuilt as a
+fixed 1606 × 1161 box, so on a 1920 × 1080 screen 22% of the width was dead
+background, and on an ultrawide 42%.
+
+## The unit
 
 ```css
 --u: min(
   calc(100vh / var(--artboard-h)),
   calc(100vw / var(--artboard-w)),
-  1.35px
+  var(--u-max)
 );
 ```
 
-Taking the smaller of the two viewport ratios makes the artboard *contain*
-itself: the hero always fits one screen in both axes, so no scrollbar appears.
-The upper bound stops the composition ballooning on very tall displays.
+Taking the smaller of the two viewport ratios keeps the vertical stack inside
+one screen at any aspect. The ceiling (`--u-max: 1.35px`) stops type ballooning
+on very large displays.
 
 Two consequences worth knowing:
 
@@ -29,23 +39,62 @@ Two consequences worth knowing:
 rounds glyph advances to whole pixels, and the navigation row drifted up to 10
 units off at smaller scales; with it, the layout is scale-invariant.
 
-## Structure
+## The structure
 
 ```
-main.page
-└── section.hero              one screen tall, full-bleed gradient
-    └── .hero__canvas         1606 × 1161 units, centred
-        ├── .hero__content    1037 units — masthead, hero, marquee
-        └── .hero__panel       569 units — glow, cards, caption
+section.section.section--hero        one screen, full bleed
+├── .hero__glow                      panel column's left edge → viewport right
+└── .hero__grid                      1fr / --split-panel, capped at --shell-max
+    ├── .hero__content               flex column
+    │   ├── .masthead                1fr auto 1fr — nav centred by construction
+    │   ├── .hero__body              margin-block: auto — takes the slack
+    │   └── .trusted                 foot of the column
+    └── .hero__panel                 flex column, card stack centred
 ```
 
-The background bleeds the full width, so the artboard's own width reads as a
-centred container rather than as letterboxing. Further sections are added as
-siblings of `.hero` and can reuse `--u` and the colour tokens.
+`--split-panel` is `--column-panel / --artboard-w` = 0.3543 — the artboard's own
+569-of-1606 split, held at every width. Change the column tokens and the layout
+follows.
 
-The 1606 canvas splits 1037 / 569, and that split is structural: the hero (842
-units) is centred on x520 — the centre of the content column, not of the page —
-and the masthead's navigation is centred on x520 too. Absolute positioning is
-used only where Figma genuinely overlaps things: the glow, the timeline dots and
-connectors, and the card contents, which carry their artboard coordinates as
-unitless `--x` / `--y` custom properties.
+`--shell-max` is the one deliberate constant in the file. Below it the hero
+fills the viewport edge to edge; above it the grid centres while the gradient
+and the glow keep bleeding, so no letterbox ever appears.
+
+## Coordinates that were really centring
+
+Most artboard offsets were centring expressed as a number. Each one is
+`(container − child) / 2`, so replacing it with `margin-inline: auto` is
+faithful to the artboard rather than a redesign:
+
+| element | was | `(container − child) / 2` |
+|---|---|---|
+| `.hero__body` | `margin-left: 99u` | (1037 − 842)/2 = 97.5 |
+| `.hero__sub` | `margin-left: 185u` | (842 − 472)/2 = 185 |
+| `.hero__actions` | `margin-left: 235u` | (842 − 372)/2 = 235 |
+| `.trusted__label` | `margin-left: 214u` | (645 − 227)/2 = 209 |
+| `.panel` | `margin-left: 114u` | (569 − 328)/2 = 120.5 |
+| `.panel__title` | `margin-left: 19u` | (328 − 290)/2 = 19 |
+
+The masthead is the same idea in a different form: the artboard centres the
+navigation on x520, the middle of the content column, so a `1fr auto 1fr` grid
+reproduces it by construction. Measured, the nav centre lands within 1px of the
+column centre from 1366 px up to 3440 px.
+
+Absolute positioning survives only where Figma genuinely overlaps things: the
+timeline dots and connectors, and the card contents, which carry their artboard
+coordinates as unitless `--x` / `--y` custom properties.
+
+## Adding a section
+
+```html
+<section class="section"> … </section>
+```
+
+`.section` gives full-bleed positioning. Give the section its own block size and
+lay its content out in a shell capped at `--shell-max`, the way `.hero__grid`
+does. Sizes inside it are `calc(<artboard number> * var(--u))`; structure is
+fractions and auto margins, never fixed offsets.
+
+Verify with `python3 tools/verify-layout.py --sections`, which stacks a second
+section and re-asserts that the hero still owns exactly one viewport and that
+nothing overflows horizontally.

@@ -16,6 +16,14 @@ deliberate.
   multiply it by `--u` — `calc(96 * var(--u))`. Ratios (`em` tracking, unitless
   line-height) stay as ratios; they scale on their own. See
   [docs/design-unit.md](docs/design-unit.md).
+- **Scale is not layout.** `--u` sizes things; it must never position them.
+  Structure is fractions of the viewport (`--split-panel`) and auto margins.
+  If you find yourself writing `margin-left: calc(<n> * var(--u))` to place
+  something, check whether that number is `(container − child) / 2` — it
+  usually is, and `margin-inline: auto` is the honest way to say it.
+- **No breakpoints inside the desktop range.** The layout is proportional, so
+  it should not need tuning per size. A media query is a signal that something
+  is pinned that ought to be fluid.
 - **Stylesheet order.** `src/css/style.css` is organised into ten numbered
   sections. Put new rules in the section they belong to rather than appending
   to the end, and keep the section header comments accurate.
@@ -31,9 +39,10 @@ deliberate.
 
 ## Before opening a pull request
 
-- Check at 1280×800 and 1920×1080 — no scrollbar should appear in either axis.
+- Run `python3 tools/verify-layout.py`. It must report `FAILURES: 0`.
+- If you added a section, run it with `--sections` too.
 - Confirm the console is clean and no request 404s.
-- If you touched type, spacing or the canvas split, re-measure against the
-  artboard numbers and update [docs/verification.md](docs/verification.md).
+- If you touched type, spacing or the column split, update the numbers in
+  [docs/verification.md](docs/verification.md).
 - Keep asset weight honest: nothing occluded, nothing unused, images encoded
   losslessly.

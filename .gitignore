@@ -17,3 +17,8 @@ tmp/
 src/assets/fonts/SuisseIntl-*.otf
 src/assets/fonts/SuisseIntl-*.ttf
 src/assets/fonts/SuisseIntl-*.woff2
+
+# Layout verification scratch (tools/verify-layout.py)
+tools/.probe-site/
+tools/.shots/
+__pycache__/

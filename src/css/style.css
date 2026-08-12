@@ -61,15 +61,34 @@
   --column-panel: 569;     /* right column, in units */
 
   /* --- the design unit -------------------------------------------------
-     One artboard unit on screen. Taking the smaller of the two viewport
-     ratios makes the artboard *contain* itself: the hero always fits in one
-     screen, in both axes, without a scrollbar. The upper bound stops the
-     composition from ballooning on very tall displays. */
+     One artboard unit on screen. This is a *scale*, not a layout: it sizes
+     type, controls, radii and card geometry, and nothing else. Structure is
+     expressed as fractions of the viewport (see --split-panel), which is
+     what lets the hero fill any screen instead of sitting in a fixed box.
+
+     Taking the smaller of the two viewport ratios keeps the vertical stack
+     inside one screen at any aspect. The ceiling stops type from ballooning
+     on very large displays. */
+  --u-max: 1.35px;
   --u: min(
     calc(100vh / var(--artboard-h)),
     calc(100vw / var(--artboard-w)),
-    1.35px
+    var(--u-max)
   );
+
+  /* --- layout ----------------------------------------------------------
+     The panel's share of the width, held at every viewport. Derived from the
+     artboard columns, so changing those changes the layout with them. */
+  --split-panel: calc(var(--column-panel) / var(--artboard-w));
+
+  /* The one deliberate constant in this file. Below this width the hero
+     fills the viewport edge to edge; above it the composition centres while
+     the gradient and the glow keep bleeding to both edges, so no letterbox
+     ever appears. */
+  --shell-max: 2560px;
+
+  /* Page gutter — the artboard sets the brand at x35. */
+  --gutter: calc(35 * var(--u));
 
   /* --- hairlines -------------------------------------------------------
      1-unit strokes would land below one device pixel at most scales and
@@ -83,7 +102,6 @@
   --text-muted: #c1c1c1;
   --ink: #111111;
   --ink-strong: #000000;
-  --fade: #161617;
 
   /* --- radii ----------------------------------------------------------- */
   --radius-card: calc(25 * var(--u));
@@ -112,6 +130,9 @@ html { -webkit-text-size-adjust: 100%; }
 
 body {
   margin: 0;
+  /* Nothing may produce a horizontal scrollbar. `clip` rather than `hidden`
+     so this does not turn the body into a scroll container. */
+  overflow-x: clip;
   font-family: var(--font-sans);
   font-weight: 400;
   color: var(--white);
@@ -127,58 +148,84 @@ a { color: inherit; text-decoration: none; }
 img, svg { display: block; }
 
 /* --------------------------------------------------------------------------
-   4. Hero shell
-   The section owns one screen; the artboard sits centred inside it. The
-   background bleeds the full width, so the artboard's own width reads as a
-   centred container rather than as letterboxing.
+   4. Section shell
+   Every section is full bleed and lays its content out inside a shell that
+   fills the viewport up to --shell-max, then centres. Sections after the hero
+   reuse `.section` and set their own block size.
    -------------------------------------------------------------------------- */
-.hero {
-  position: relative;
+.section { position: relative; }
+
+/* The hero owns exactly one screen. `min-block-size` rather than a fixed
+   height so a section that grows past the viewport is never clipped. */
+.section--hero {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
+  min-block-size: 100vh;
+  min-block-size: 100svh;
   overflow: hidden;
   background: linear-gradient(180deg, var(--surface-top) 0%, var(--surface-bottom) 100%);
 }
 
-.hero__canvas {
+/* Two columns holding the artboard's proportion at every width. The fixed
+   1037 / 569 unit widths this replaces are what produced the fixed-size box. */
+.hero__grid {
   position: relative;
-  display: flex;
-  align-items: flex-start;
-  width: calc(var(--artboard-w) * var(--u));
-  height: calc(var(--artboard-h) * var(--u));
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr calc(var(--split-panel) * 100%);
+  inline-size: 100%;
+  max-inline-size: var(--shell-max);
+  margin-inline: auto;
 }
 
+/* Grid children default to min-content width, which lets long words push a
+   column wider than its track. Zeroing that keeps the columns honest. */
+.hero__content,
+.hero__panel { min-inline-size: 0; }
+
 .hero__content {
-  flex: 0 0 calc(var(--column-content) * var(--u));
-  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: calc(46 * var(--u)) var(--gutter) calc(59 * var(--u));
 }
 
 .hero__panel {
   position: relative;
-  flex: 0 0 calc(var(--column-panel) * var(--u));
-  align-self: stretch;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-block: calc(46 * var(--u)) calc(59 * var(--u));
+}
+
+/* The glow starts at the panel column's left edge and runs to the viewport's
+   right edge, so it still bleeds once the shell stops growing. */
+.hero__glow {
+  position: absolute;
+  inset-block: 0;
+  right: 0;
+  left: calc(50%
+             + min(100%, var(--shell-max)) / 2
+             - min(100%, var(--shell-max)) * var(--split-panel));
 }
 
 /* --------------------------------------------------------------------------
    5. Masthead
-   Artboard: brand at x35/y46, navigation at x318/y48, call to action at
-   x873/y38 — all optically centred on y58.
+   Artboard: brand at x35, navigation centred on x520, call to action flush
+   with the content column's right edge — all optically centred on y58.
+   A three-track grid reproduces that centring by construction, so the row
+   holds at any column width instead of carrying fixed coordinates.
    -------------------------------------------------------------------------- */
 .masthead {
-  position: relative;
-  height: calc(116 * var(--u));
+  flex: none;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: calc(24 * var(--u));
 }
 
 .brand {
-  position: absolute;
-  left: calc(35 * var(--u));
-  top: calc(46 * var(--u));
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: calc(9 * var(--u));
-  height: calc(24 * var(--u));
 }
 .brand__mark {
   width: calc(29 * var(--u));
@@ -192,11 +239,7 @@ img, svg { display: block; }
   color: var(--white);
 }
 
-.mainnav {
-  position: absolute;
-  left: calc(318 * var(--u));
-  top: calc(48 * var(--u));
-}
+.mainnav { justify-self: center; }
 .mainnav__list {
   display: flex;
   gap: calc(44 * var(--u));
@@ -215,9 +258,7 @@ img, svg { display: block; }
 .mainnav__list a:focus-visible { opacity: 1; }
 
 .btn-nav {
-  position: absolute;
-  left: calc(873 * var(--u));
-  top: calc(38 * var(--u));
+  justify-self: end;
   display: flex;
   align-items: center;
   padding: calc(10.37 * var(--u)) calc(15.83 * var(--u));
@@ -234,12 +275,16 @@ img, svg { display: block; }
 
 /* --------------------------------------------------------------------------
    6. Hero body
-   Artboard: an 842-unit block at x99/y282. Stack is head, 54, subtitle,
-   54, actions.
+   Artboard: an 842-unit block, stack is head, 54, subtitle, 54, actions.
+   The artboard's x99 offset is (1037 - 842) / 2 — it was centring written as
+   a coordinate, so it is written as centring here. `margin-block: auto` takes
+   the leftover height between masthead and marquee, which is what lets the
+   column breathe with the viewport instead of overflowing it.
    -------------------------------------------------------------------------- */
 .hero__body {
-  width: calc(842 * var(--u));
-  margin: calc(166 * var(--u)) 0 0 calc(99 * var(--u));
+  inline-size: min(calc(842 * var(--u)), 100%);
+  margin-block: auto;
+  margin-inline: auto;
   text-align: center;
 }
 
@@ -284,8 +329,8 @@ img, svg { display: block; }
    letter-spacing after a line's last glyph where Figma does not, and without
    the deduction every centred line would sit half a step to the right. */
 .hero__title {
-  width: calc((842 - 96 * 0.04) * var(--u));
-  margin: calc(45 * var(--u)) 0 0;
+  inline-size: min(calc((842 - 96 * 0.04) * var(--u)), 100%);
+  margin: calc(45 * var(--u)) auto 0;
   font-size: calc(96 * var(--u));
   font-weight: 400;
   line-height: 1;
@@ -297,8 +342,8 @@ img, svg { display: block; }
 }
 
 .hero__sub {
-  width: calc((472 - 20 * 0.04) * var(--u));
-  margin-left: calc(185 * var(--u));
+  inline-size: min(calc((472 - 20 * 0.04) * var(--u)), 100%);
+  margin-inline: auto;
   font-size: calc(20 * var(--u));
   line-height: 1.4;
   letter-spacing: var(--track-tight);
@@ -309,7 +354,7 @@ img, svg { display: block; }
   display: flex;
   gap: calc(18 * var(--u));
   width: calc(372 * var(--u));
-  margin: calc(54 * var(--u)) 0 0 calc(235 * var(--u));
+  margin: calc(54 * var(--u)) auto 0;
 }
 
 .btn {
@@ -340,19 +385,19 @@ img, svg { display: block; }
 
 /* --------------------------------------------------------------------------
    7. Trusted-by marquee
-   Artboard: a 645 x 106 group at x193/y996. A 606-unit clipping frame holds a
-   1239-unit row carrying the five marks twice, one cycle apart.
+   Artboard: a 645-unit group holding a 606-unit clipping frame, which carries
+   the five marks twice, one cycle apart. Sits at the foot of the column; the
+   space above it is whatever `.hero__body` does not take.
    -------------------------------------------------------------------------- */
 .trusted {
-  position: relative;
-  width: calc(645 * var(--u));
-  height: calc(106 * var(--u));
-  margin: calc(122 * var(--u)) 0 0 calc(193 * var(--u));
+  flex: none;
+  inline-size: min(calc(645 * var(--u)), 100%);
+  margin-inline: auto;
 }
 
 .trusted__label {
-  width: calc((227 + 12 * 0.07) * var(--u));
-  margin-left: calc(214 * var(--u));
+  inline-size: min(calc((227 + 12 * 0.07) * var(--u)), 100%);
+  margin-inline: auto;
   font-size: calc(12 * var(--u));
   line-height: 1.08333;
   letter-spacing: var(--track-wide);
@@ -363,12 +408,21 @@ img, svg { display: block; }
   opacity: 0.4;
 }
 
+/* The artboard fades the row's ends with two solid #161617 rectangles laid
+   over the gradient. That only works while the marquee sits at one fixed
+   height; once it moves with the viewport the flat colour no longer matches
+   the gradient behind it and shows as a seam. A mask fades whatever is
+   actually there, at any position. 112 of 606 units ≈ 18%. */
 .marquee {
-  width: calc(606 * var(--u));
+  inline-size: min(calc(606 * var(--u)), 100%);
   height: calc(25.351 * var(--u));
-  margin: calc(44 * var(--u)) 0 0 calc(39 * var(--u));
+  margin: calc(44 * var(--u)) auto 0;
   overflow: hidden;
   opacity: 0.4;
+  -webkit-mask-image: linear-gradient(90deg,
+    transparent 0%, #000 18%, #000 82%, transparent 100%);
+          mask-image: linear-gradient(90deg,
+    transparent 0%, #000 18%, #000 82%, transparent 100%);
 }
 
 .marquee__track {
@@ -394,44 +448,25 @@ img, svg { display: block; }
 .marquee__logo--amazon { width: calc(80.446 * var(--u)); height: calc(24.151 * var(--u)); }
 .marquee__logo--adobe  { width: calc(93.448 * var(--u)); height: calc(24.766 * var(--u)); }
 
-.marquee__fade {
-  position: absolute;
-  top: calc(30 * var(--u));
-  width: calc(112 * var(--u));
-  height: calc(76 * var(--u));
-  pointer-events: none;
-}
-.marquee__fade--start {
-  left: 0;
-  background: linear-gradient(90deg, var(--fade) 31.71%, rgba(22, 22, 23, 0) 93.33%);
-}
-.marquee__fade--end {
-  left: calc(542 * var(--u));
-  background: linear-gradient(270deg, var(--fade) 31.71%, rgba(22, 22, 23, 0) 93.33%);
-}
-
 /* --------------------------------------------------------------------------
    8. Panel column
-   Artboard: glow at x0/y20 within the column; cards at x114/y213.
+   Artboard: the glow fills the column; cards sit centred on it. The card stack
+   centres vertically rather than starting at a fixed y213.
    -------------------------------------------------------------------------- */
 
 /* The wash is the source bitmap with Figma's vibrance at -100, which resolves
-   fully desaturated; the filter reproduces that without altering the asset. */
-.glow {
-  position: absolute;
-  left: 0;
-  top: calc(20 * var(--u));
-  width: calc(549 * var(--u));
-  height: calc(1117 * var(--u));
-  border-radius: var(--radius-glow);
+   fully desaturated; the filter reproduces that without altering the asset.
+   Geometry lives in §4 — it is a full-bleed layer, not a panel child. */
+.hero__glow {
+  border-radius: var(--radius-glow) 0 0 var(--radius-glow);
   background: #ffffff url('../assets/images/gradient-08.png') center / cover no-repeat;
   filter: grayscale(1);
 }
 
 .panel {
   position: relative;
-  width: calc(328 * var(--u));
-  margin: calc(213 * var(--u)) 0 0 calc(114 * var(--u));
+  inline-size: min(calc(328 * var(--u)), 100%);
+  margin-inline: auto;
 }
 
 .card {
@@ -573,8 +608,8 @@ img, svg { display: block; }
 }
 
 .panel__title {
-  width: calc((290 - 28 * 0.04) * var(--u));
-  margin: calc(96 * var(--u)) 0 0 calc(19 * var(--u));
+  inline-size: min(calc((290 - 28 * 0.04) * var(--u)), 100%);
+  margin: calc(96 * var(--u)) auto 0;
   font-size: calc(28 * var(--u));
   font-weight: 500;                     /* Suisse Intl Book */
   line-height: 1;
@@ -585,8 +620,8 @@ img, svg { display: block; }
 }
 
 .panel__caption {
-  width: calc((220 - 16 * 0.04) * var(--u));
-  margin: calc(16 * var(--u)) 0 0 calc(56 * var(--u));
+  inline-size: min(calc((220 - 16 * 0.04) * var(--u)), 100%);
+  margin: calc(16 * var(--u)) auto 0;
   font-size: calc(16 * var(--u));
   line-height: 1.375;                   /* 22 / 16 */
   letter-spacing: var(--track-tight);
@@ -604,8 +639,22 @@ img, svg { display: block; }
 
 /* --------------------------------------------------------------------------
    10. Viewport scope
-   Laptop and desktop are the supported range. Narrower viewports still render
-   — `--u` simply becomes width-driven and the artboard scales down intact —
-   but no reflow has been designed for them yet. Tablet and handheld layouts
-   belong here when they are specified.
+
+   Laptop and desktop are the supported range, and within it the hero is
+   resolution-independent: the columns are proportions, the vertical stack
+   distributes leftover height, and only the type scale reads the viewport.
+   Nothing carries a fixed coordinate, so there is no breakpoint to maintain.
+
+   Narrower viewports still render intact — `--u` becomes width-driven and the
+   whole composition scales down — but the two-column split holds all the way
+   down, which is wrong below roughly 900 units of width. Tablet and handheld
+   want the panel stacked under the content rather than beside it; that is the
+   one reflow this file still owes, and it belongs here.
+
+   Adding a section:
+     <section class="section"> … </section>
+   `.section` gives full-bleed positioning; give the section its own block
+   size and lay its content out in a shell capped at --shell-max, the way
+   `.hero__grid` does. Sizes inside it are `calc(<artboard number> * var(--u))`;
+   structure is fractions and auto margins, never fixed offsets.
    -------------------------------------------------------------------------- */
