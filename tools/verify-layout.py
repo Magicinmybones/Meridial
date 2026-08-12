@@ -133,10 +133,10 @@ def check(d, stacked=False):
     if d["scrollW"] > cw:
         f.append(f"h-scroll ({d['scrollW']}>{cw})")
 
-    # every section owns exactly one viewport, and the page is their sum
-    n = 2 if d.get("signal") else 1
-    if not stacked and abs(d["scrollH"] - d["clientH"] * n) > 2:
-        f.append(f"page height {d['scrollH']} != {n} viewports ({d['clientH'] * n})")
+    # Each section still settles to exactly one viewport. The page is taller
+    # than the sum of them now: the signal section is pinned inside a track that
+    # provides a screen of scroll for the morph, so total scroll height is not
+    # the assertion any more — the per-section heights below are.
 
     for name, key in (("hero", "hero"), ("signal", "signal")):
         b = d.get(key)
@@ -151,13 +151,15 @@ def check(d, stacked=False):
     if glow and abs(glow["r"] - cw) > 0.5:
         f.append(f"DEAD BAND: glow right {glow['r']} != content edge {cw}")
 
-    # the board holds the artboard's 328 / 407 / 407 column split
-    colA, colM, colE = d.get("colA"), d.get("colM"), d.get("colE")
-    if colA and colM and colE and colM["w"]:
-        if abs(colA["w"] / colM["w"] - 328 / 407) > 0.01:
-            f.append(f"board col1/col2 {colA['w'] / colM['w']:.4f} != 0.8059")
-        if abs(colE["w"] / colM["w"] - 1) > 0.01:
-            f.append(f"board col3/col2 {colE['w'] / colM['w']:.4f} != 1")
+    # The board holds the artboard's 328 / 407 / 407 column split. Measured as
+    # laid-out widths: the morph transforms column one, so its painted rect is
+    # not its layout width until the scrub completes.
+    cl = d.get("colLayout")
+    if cl and len(cl) == 3 and cl[1]:
+        if abs(cl[0] / cl[1] - 328 / 407) > 0.01:
+            f.append(f"board col1/col2 {cl[0] / cl[1]:.4f} != 0.8059")
+        if abs(cl[2] / cl[1] - 1) > 0.01:
+            f.append(f"board col3/col2 {cl[2] / cl[1]:.4f} != 1")
 
     return f
 

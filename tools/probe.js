@@ -73,6 +73,10 @@
       colA: box('.board__col--allocation'),
       colM: box('.board__col--mid'),
       colE: box('.board__col--end'),
+      /* Layout widths, which transforms do not affect — the morph scales
+         column one, so its rect mid-morph is not its laid-out width. */
+      colLayout: ['.board__col--allocation', '.board__col--mid', '.board__col--end']
+        .map(function (s) { var e = document.querySelector(s); return e ? e.offsetWidth : 0; }),
       radar: box('.radar'),
       fsTitle: fs('.hero__title'),
       fsSub: fs('.hero__sub'),

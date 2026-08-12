@@ -94,3 +94,36 @@ Narrower viewports still render intact, but the two-column split holds all the
 way down, which is wrong below roughly 900 units of width. Tablet and handheld
 want the panel stacked under the content; that reflow is the one thing the
 stylesheet still owes, and §10 is where it belongs.
+
+## Motion
+
+Timings come from the reference recording — 574 frames at 60fps — measured
+rather than eyeballed: per-element luminance curves give each reveal's start,
+midpoint and end to within a frame. They live in one place, §17 of the
+stylesheet.
+
+The reveal is opacity only. The title's luminance centroid holds steady at ~123
+through the recorded reveal, so nothing travels into place; adding a rise would
+have been an invention.
+
+The transition between the sections is not a scroll. Tracking the bright region
+across frames 262→332 shows the hero's glow expanding from x227–249 to the full
+width, while the hero's two panel cards travel into the board's first column —
+the same elements in both artboards. It is reproduced as a scroll-scrubbed
+morph over one screen of pinned scroll, with both ends measured at runtime.
+
+Asserted at each viewport, by scrubbing the morph to 0, 0.5 and 1:
+
+| viewport | column one at 0 | at 1 | settled layout |
+|---|---|---|---|
+| 1920×1080 | x1415 w305 | x255 w393 | x255 w393 |
+| 1366×768 | x1003 w217 | x181 w279 | x181 w279 |
+
+The morph lands exactly on the settled layout, and the layout assertions above
+still pass unchanged — the animation moves nothing permanently.
+
+**A regression worth recording.** Animating opacity on the title's three lines
+gives each its own stacking context, and a composited child cannot show through
+an ancestor's `background-clip: text`: the headline vanished entirely. Each line
+now carries its own slice of the gradient, sized to three line-heights and
+stepped 0% / 50% / 100%, which reproduces the single wash exactly.

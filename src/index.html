@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Meridial — Clarity, across every portfolio you manage</title>
 <meta name="description" content="Meridial gives advisors real-time insight across every client's holdings — without the spreadsheet.">
+<!-- Set before the stylesheet so the reveal only ever hides content on a page
+     that can actually run the animation. Without JS everything renders. -->
+<script>document.documentElement.className += ' js';</script>
 <link rel="icon" href="assets/logos/favicon.svg" type="image/svg+xml">
 <link rel="stylesheet" href="css/style.css">
 </head>
@@ -22,14 +25,14 @@
   <section class="section section--hero" id="hero">
 
     <!-- Bleeds past the shell to the viewport's right edge. -->
-    <div class="hero__glow" aria-hidden="true"></div>
+    <div class="hero__glow" aria-hidden="true" data-reveal="glow" data-hero-glow></div>
 
     <div class="hero__grid">
 
       <!-- ---------- content column ---------- -->
       <div class="hero__content">
 
-        <header class="masthead">
+        <header class="masthead" data-reveal="masthead">
           <a class="brand" href="#hero">
             <span class="brand__mark" aria-hidden="true">
               <svg viewBox="0 0 29 24" fill="none" focusable="false">
@@ -72,19 +75,19 @@
 
         <div class="hero__body">
           <div class="hero__head">
-            <p class="pill">Managing $4.2B+ in tracked assets</p>
-            <h1 class="hero__title">Clarity, across <br>every portfolio you manage</h1>
+            <p class="pill" data-reveal="eyebrow">Managing $4.2B+ in tracked assets</p>
+            <h1 class="hero__title"><span class="hero__line" data-reveal="title-1">Clarity, across </span><span class="hero__line" data-reveal="title-2">every portfolio you</span><span class="hero__line" data-reveal="title-3">manage</span></h1>
           </div>
 
-          <p class="hero__sub">Meridial gives advisors real-time insight across every client's holdings — without the spreadsheet</p>
+          <p class="hero__sub" data-reveal="sub">Meridial gives advisors real-time insight across every client's holdings — without the spreadsheet</p>
 
-          <div class="hero__actions">
+          <div class="hero__actions" data-reveal="actions">
             <a class="btn btn--solid" href="#">Request access</a>
             <a class="btn btn--ghost" href="#">Book a demo</a>
           </div>
         </div>
 
-        <section class="trusted" aria-label="Trusted by">
+        <section class="trusted" aria-label="Trusted by" data-reveal="marquee">
           <p class="trusted__label">Trusted by wealth advisors at</p>
 
           <div class="marquee">
@@ -107,7 +110,7 @@
 
       <!-- ---------- panel column ---------- -->
       <div class="hero__panel">
-        <div class="panel">
+        <div class="panel" data-reveal="cards" data-hero-panel>
 
           <article class="card card--allocation">
             <span class="card__item dot dot--filled" style="--x:28; --y:29"></span>
@@ -174,14 +177,15 @@
        1198 x 689 dashboard and the closing line. The dashboard sits left of
        centre in the artboard; that offset is the design, not a mistake.
        ==================================================================== -->
+  <div class="signal-track" data-morph-track>
   <section class="section section--signal" id="signal">
-    <div class="signal__wash" aria-hidden="true"></div>
+    <div class="signal__wash" aria-hidden="true" data-signal-wash></div>
 
     <div class="signal">
 
       <!-- The artboard runs the masthead across the full width here, rather
            than inside a column as the hero does. -->
-      <header class="masthead signal__masthead">
+      <header class="masthead signal__masthead" data-reveal="signal-masthead">
         <a class="brand" href="#hero">
           <span class="brand__mark" aria-hidden="true">
             <svg viewBox="0 0 29 24" fill="none" focusable="false">
@@ -225,7 +229,7 @@
       <div class="board">
 
         <!-- ---------- allocation column (328 of 1198) ---------- -->
-        <div class="board__col board__col--allocation">
+        <div class="board__col board__col--allocation" data-board-col1>
 
           <article class="board-card board-card--blur board-card--allocation">
             <span class="bc__item dot dot--filled" style="--x:28; --y:29"></span>
@@ -280,7 +284,7 @@
         </div>
 
         <!-- ---------- composition and activity column (407 of 1198) ---------- -->
-        <div class="board__col board__col--mid">
+        <div class="board__col board__col--mid" data-reveal="board-mid">
 
           <article class="board-card board-card--composition">
             <p class="bc__item card__label" style="--x:28; --y:29">Portfolio composition</p>
@@ -359,7 +363,7 @@
         </div>
 
         <!-- ---------- digest column (407 of 1198) ---------- -->
-        <div class="board__col board__col--end">
+        <div class="board__col board__col--end" data-reveal="board-end">
 
           <article class="board-card board-card--digest">
             <p class="bc__item card__label" style="--x:27; --y:29">Weekly portfolio digest</p>
@@ -392,9 +396,10 @@
         </div>
       </div>
 
-      <p class="signal__title">Every advisor, every client, one clear signal</p>
+      <p class="signal__title" data-reveal="signal-title">Every advisor, every client, one clear signal</p>
     </div>
   </section>
+  </div>
 
 </main>
 
