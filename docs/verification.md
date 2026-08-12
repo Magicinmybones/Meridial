@@ -91,6 +91,54 @@ Text-heavy regions cannot be corroborated more precisely: the reference export
 embedded in the `.fig` is 359 × 269, at which size its type is illegible. It
 confirms placement, tone and mass; the numeric extraction covers the rest.
 
+### The two panel cards
+
+The recording gives a better reference than the embedded export: at 1800 × 1350
+it renders the artboard 1:1 (offset 29 px down), so the cards can be cropped
+from a settled hero frame and compared against the same crop of our own render,
+unit for unit.
+
+That comparison found one thing, and it was the thing the eye reads first. The
+card fill alone is 10% black, which over the glow barely separates the card
+from it. Figma's `BACKGROUND_BLUR` on both rectangles carries a **25% black
+tint** alongside its 155.3 radius, and that tint had not been reproduced. Two
+pure blacks compose as one, so the pair is a single value: 1 − 0.75 × 0.90 =
+**0.325**.
+
+Measured across the card's left edge, where the wash is brightest, as the drop
+in luminance from just outside the card to just inside:
+
+| sample | reference | before | after |
+|---|---|---|---|
+| card 1, y380–420 | −46.7 | −20.8 | −58.5 |
+| card 1, y600–660 | −44.8 | −23.7 | −50.9 |
+| card 2, y880–940 | −43.8 | −19.9 | −40.4 |
+
+Mean transmittance is 0.657 in the reference against 0.627 now, where before it
+was 0.835. The residual 5% is the two blur implementations disagreeing about
+how much of the darker surround they pull in — Chromium's `backdrop-filter`
+samples wider than Figma's — not the tint. Dialling the alpha off the file's
+own composite to close it would be encoding a browser difference as a design
+token, so 0.325 stands.
+
+Three smaller corrections came out of the same extraction:
+
+- Uppercase labels run at the artboard's raw line height of **1.05**, not the
+  1.08333 implied by rounding the node's 13-unit box against its 12-unit type.
+- Every one of the six board rectangles carries that identical blur effect, not
+  just the two in the first column, so the modifier that limited it to those
+  two is gone and the blur belongs to `.board-card` itself.
+- The board's trend chart is **290** units wide, matching the hero's. Section
+  two's own artboard draws it at 260, but the two artboards disagree and it is
+  the same card in both — it travels from the panel into that column — so a
+  differing width would show as a jump at the handover.
+
+The figures (`60%`, `40%`, the value, the delta) now carry their artboard box
+width and Figma's `CENTER` alignment. Figma sizes those boxes to the glyphs, so
+the alignment costs nothing there; here it keeps a substituted face growing
+about the artboard's centre rather than pushing right, which is what holds the
+60 / 40 row balanced around its separator.
+
 ## Scope
 
 Laptop, desktop and ultrawide. Within that range there are no breakpoints —
