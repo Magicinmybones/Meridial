@@ -1100,6 +1100,19 @@ img, svg { display: block; }
 
 /* Everything the signal section adds arrives after the swap — the new content
    coming in once the panel has taken the screen. */
+/* The box forms around the cards as they arrive rather than appearing after
+   them: it comes in fractionally under size, so the cards read as settling
+   into it. */
+.morph-ready .board {
+  transform: scale(0.985);
+  transform-origin: 50% 40%;
+}
+.signal-in .board {
+  transform: scale(1);
+  transition: opacity calc(var(--morph-dur) * 0.35) var(--morph-ease),
+              transform calc(var(--morph-dur) * 0.45) var(--morph-ease);
+}
+
 .morph-ready .board,
 .morph-ready [data-reveal='board-mid'],
 .morph-ready [data-reveal='board-end'],
