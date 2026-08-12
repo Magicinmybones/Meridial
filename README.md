@@ -47,11 +47,15 @@ docs/                      design and provenance notes
 
 ## Deployment
 
-`.github/workflows/deploy.yml` publishes `src/` to GitHub Pages on every push
-to `main`. Enable it once under **Settings → Pages → Source → GitHub Actions**.
+There is no build step, so deployment is just "serve `src/`".
 
-Because there is no build step, any static host works just as well: point it at
-`src/` and serve.
+- **Vercel** — `vercel.json` sets `src/` as the output directory with no build
+  or install command, so importing the repository deploys it as is.
+- **GitHub Pages** — `.github/workflows/deploy.yml` publishes `src/` on every
+  push to `main`. Enable it once under **Settings → Pages → Source → GitHub
+  Actions**.
+
+Any other static host works the same way: point it at `src/`.
 
 ## Working on it
 
