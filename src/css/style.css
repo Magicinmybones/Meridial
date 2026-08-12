@@ -757,13 +757,19 @@ img, svg { display: block; }
 .board {
   position: absolute;
   top: calc(236 * var(--u));
-  left: calc(100% * 204 / var(--artboard-w));
-  inline-size: calc(100% * 1198 / var(--artboard-w));
+  left: 0;
+  right: 0;
+  margin-inline: auto;
+  /* The artboard's own geometry: 1198 units, centred (204 clear each side).
+     Fixed in units — not stretched — so the dashboard's cards are the same
+     size as the hero panel's, and the travel between them is translate-only.
+     Stretching the columns made the cards scale 1.29x during the travel and
+     the type visibly jumped at the handover. */
+  inline-size: calc(1198 * var(--u));
   block-size: calc(689 * var(--u));
   display: flex;
   padding: calc(13 * var(--u)) calc(20 * var(--u)) calc(15 * var(--u)) calc(14 * var(--u));
   border-radius: calc(39 * var(--u));
-  background: linear-gradient(180deg, var(--surface-top) 0%, rgba(25, 25, 25, 0.4) 100%);
 }
 
 .board__col {
@@ -771,9 +777,9 @@ img, svg { display: block; }
   flex-direction: column;
   min-inline-size: 0;
 }
-.board__col--allocation { flex: 328 1 0; gap: calc(11 * var(--u)); }
-.board__col--mid        { flex: 407 1 0; gap: calc(12 * var(--u)); margin-inline-start: calc(13 * var(--u)); }
-.board__col--end        { flex: 407 1 0; gap: calc(12 * var(--u)); margin-inline-start: calc(9 * var(--u)); }
+.board__col--allocation { flex: none; inline-size: calc(328 * var(--u)); gap: calc(11 * var(--u)); }
+.board__col--mid        { flex: none; inline-size: calc(407 * var(--u)); gap: calc(12 * var(--u)); margin-inline-start: calc(13 * var(--u)); }
+.board__col--end        { flex: none; inline-size: calc(407 * var(--u)); gap: calc(12 * var(--u)); margin-inline-start: calc(9 * var(--u)); }
 
 /* --------------------------------------------------------------------------
    13. Board cards
@@ -1131,15 +1137,13 @@ img, svg { display: block; }
   transform-origin: 50% 0;
 }
 
-.morph-ready .board::before {
-  opacity: 0;
-  transform: scaleY(0.7);
-}
+/* Measured at full rate: after the travel lands the cards sit alone for
+   300ms, then the box fades in place over ~130ms — its top edge never moves,
+   so it neither grows nor slides. */
+.morph-ready .board::before { opacity: 0; }
 .signal-in .board::before {
   opacity: 1;
-  transform: scaleY(1);
-  transition: opacity 300ms var(--morph-ease) 130ms,
-              transform 300ms var(--morph-ease) 130ms;
+  transition: opacity 130ms var(--morph-ease) 300ms;
 }
 
 /* The cards keep their own stacking above the box that arrives behind them. */
@@ -1158,7 +1162,7 @@ img, svg { display: block; }
 .signal-in [data-reveal='board-end'],
 .signal-in [data-reveal='signal-title'] {
   opacity: 1;
-  transition: opacity 200ms var(--morph-ease) 340ms;
+  transition: opacity 200ms var(--morph-ease) 390ms;
 }
 /* The closing line is the last thing to arrive, well after the columns. */
 .signal-in [data-reveal='signal-title'] { transition-delay: 850ms; }

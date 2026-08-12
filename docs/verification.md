@@ -56,6 +56,13 @@ layout-only and leaves the typography untouched.
 
 ## The signal section
 
+The dashboard is unit-faithful: 1198 units wide, centred exactly as the
+artboard has it (204 clear each side), columns at 328 / 407 / 407 units. This
+is what makes the transition's card travel translate-only — the hero panel's
+cards and the board's first-column cards measure byte-identical widths at
+every viewport (305.11px == 305.11px at 1920×1080), so the handover cannot
+show a size jump.
+
 Section two passes the same nine viewports. Measured at 1920 x 1080 it spans
 y1080 to y2160 — exactly one viewport, immediately after the hero — and its
 board columns measure 393.19 / 487.89 / 487.89, a ratio of 0.8059 against the
@@ -116,7 +123,7 @@ curves per frame, not sampled. Times relative to the travel's start (f272):
 | panel cards | travel left with the panel | 0–1000ms |
 | **masthead nav + CTA** | **slide right — never fade** | 150–1000ms |
 | swap of sections | single frame, geometrically aligned | 1000ms |
-| board box | grows from its top edge, behind the cards | 1130–1430ms |
+| board box | **fades in place** — top edge never moves | 1300–1430ms |
 | columns two & three | fade in | ~1470ms |
 | closing line | fades in **last** | ~1900ms |
 
