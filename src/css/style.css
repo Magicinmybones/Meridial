@@ -322,7 +322,7 @@ img, svg { display: block; }
   padding: calc(10 * var(--u));
   text-align: left;
   font-size: calc(12 * var(--u));
-  line-height: 1.08333;                 /* 13 / 12 */
+  line-height: 1.05;                    /* the artboard's raw line height */
   letter-spacing: var(--track-wide);
   text-transform: uppercase;
   color: var(--white);
@@ -491,11 +491,21 @@ img, svg { display: block; }
   margin-inline: auto;
 }
 
+/* The card is two black layers over a blurred backdrop, not one. Figma's
+   BACKGROUND_BLUR on both rectangles carries `#000000 a=0.25` alongside its
+   155.3 radius, and the node's own fill adds 10% black on top of that. Two
+   pure blacks compose exactly as one, so the pair is a single declaration:
+   1 - 0.75 x 0.90 = 0.325. It is the difference the eye reads first — with the
+   fill alone the card barely separates from the wash. Measured against the
+   reference render at the left edge, where the wash is brightest, the card
+   darkens its backdrop by ~45 luminance; the fill on its own gives ~21.
+
+   Figma states blur as twice the Gaussian sigma CSS wants, hence 155.3 / 2. */
 .card {
   position: relative;
   width: 100%;
   border-radius: var(--radius-card);
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.325);
   -webkit-backdrop-filter: blur(calc(77.65 * var(--u)));
           backdrop-filter: blur(calc(77.65 * var(--u)));
 }
@@ -528,6 +538,18 @@ img, svg { display: block; }
   left: calc(var(--x) * var(--u));
   top: calc(var(--y) * var(--u));
   margin: 0;
+}
+
+/* The artboard's figures sit in auto-width boxes set to CENTER: Figma measures
+   the box to the glyphs, so the alignment costs nothing there. It costs
+   something here, because a substituted face measures wider than Suisse Intl.
+   Carrying the box (--w) and the centring keeps each figure growing about the
+   artboard's centre instead of pushing right, which is what holds the
+   60 / 40 row balanced around its separator. */
+.fig-box {
+  inline-size: calc(var(--w) * var(--u));
+  text-align: center;
+  white-space: nowrap;
 }
 
 .dot {
@@ -566,7 +588,7 @@ img, svg { display: block; }
 
 .card__label {
   font-size: calc(12 * var(--u));
-  line-height: 1.08333;
+  line-height: 1.05;                    /* the artboard's raw line height */
   letter-spacing: var(--track-wide);
   text-transform: uppercase;
   color: var(--white);
@@ -777,15 +799,18 @@ img, svg { display: block; }
 
 /* --------------------------------------------------------------------------
    13. Board cards
-   Same shell as the hero's panel cards — 25-unit radius, 10% black, a 10%
-   gradient hairline — but only the allocation column carries the artboard's
-   background blur, so the two are kept separate rather than shared.
+   The same shell as the hero's panel cards, and the same on every one of the
+   six: each board rectangle in the artboard carries the identical
+   BACKGROUND_BLUR — radius 155.3, tinted 25% black — over its own 10% fill.
+   See §8 for how the two blacks compose to 0.325.
    -------------------------------------------------------------------------- */
 .board-card {
   position: relative;
   flex: none;
   border-radius: calc(25 * var(--u));
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.325);
+  -webkit-backdrop-filter: blur(calc(77.65 * var(--u)));
+          backdrop-filter: blur(calc(77.65 * var(--u)));
 }
 .board-card::before {
   content: '';
@@ -802,11 +827,6 @@ img, svg { display: block; }
           mask-composite: exclude;
   pointer-events: none;
 }
-.board-card--blur {
-  -webkit-backdrop-filter: blur(calc(77.65 * var(--u)));
-          backdrop-filter: blur(calc(77.65 * var(--u)));
-}
-
 .board-card--allocation  { block-size: calc(386 * var(--u)); }
 .board-card--value       { block-size: calc(264 * var(--u)); }
 .board-card--composition { block-size: calc(264 * var(--u)); }
@@ -832,8 +852,12 @@ img, svg { display: block; }
 /* The artboard runs these at full strength, unlike the hero's dimmed note. */
 .board-card .card__note--bright { opacity: 1; }
 
+/* 290, matching the hero's card rather than this artboard's 260. The two are
+   the same card — it travels from the panel into this column — so a differing
+   chart width would show as a jump at the handover. The artboards disagree
+   with each other here; the hero's is the one the card arrives with. */
 .board-card .trend {
-  inline-size: calc(260 * var(--u));
+  inline-size: calc(290 * var(--u));
   block-size: calc(117 * var(--u));
   overflow: visible;
 }

@@ -117,11 +117,11 @@
             <p class="card__item card__label" style="--x:63; --y:34">Target allocation</p>
             <span class="card__item tl-line" style="--x:38.5; --y:55; --len:185"></span>
 
-            <p class="card__item stat" style="--x:63;  --y:78">60%</p>
-            <p class="card__item stat stat--sep" style="--x:161; --y:78">/</p>
-            <p class="card__item stat" style="--x:200; --y:78">40%</p>
-            <p class="card__item stat__unit" style="--x:63;  --y:120">equity</p>
-            <p class="card__item stat__unit" style="--x:200; --y:120">bonds</p>
+            <p class="card__item stat fig-box" style="--x:63;  --y:78; --w:72">60%</p>
+            <p class="card__item stat stat--sep fig-box" style="--x:161; --y:78; --w:13">/</p>
+            <p class="card__item stat fig-box" style="--x:200; --y:78; --w:72">40%</p>
+            <p class="card__item stat__unit fig-box" style="--x:63;  --y:120; --w:38">equity</p>
+            <p class="card__item stat__unit fig-box" style="--x:200; --y:120; --w:40">bonds</p>
 
             <p class="card__item pill pill--card" style="--x:63; --y:166">Rebalance needed</p>
             <p class="card__item card__note" style="--x:63; --y:203">Bond allocation drifted 4.2%</p>
@@ -140,8 +140,8 @@
 
           <article class="card card--value">
             <p class="card__item card__label" style="--x:28; --y:29">Whitmore Family Trust</p>
-            <p class="card__item value" style="--x:28; --y:70">$18,420,500</p>
-            <p class="card__item value__delta" style="--x:216; --y:79">&#9650; 2.4%</p>
+            <p class="card__item value fig-box" style="--x:28; --y:70; --w:178">$18,420,500</p>
+            <p class="card__item value__delta fig-box" style="--x:216; --y:79; --w:50">&#9650; 2.4%</p>
 
             <svg class="card__item chart-grid" style="--x:28; --y:121"
                  viewBox="0 0 274 120" preserveAspectRatio="none"
@@ -157,7 +157,6 @@
               </defs>
               <path fill="url(#chartFill)" d="M 37.149 84.455 C 15.163 80.926 16.699 49.140 0.000 53.212 L 0.000 117.000 L 290.000 117.000 L 290.000 84.455 C 275.806 84.455 273.858 71.184 267.178 68.198 C 260.499 65.213 258.644 62.428 250.851 63.514 C 243.058 64.599 231.654 99.951 215.234 102.665 C 198.814 105.379 188.695 85.540 175.614 72.240 C 162.534 58.940 166.746 37.484 152.831 34.770 C 138.915 32.055 128.614 2.250 111.915 0.078 C 95.217 -2.093 85.720 41.569 75.701 48.626 C 65.681 55.683 59.136 87.983 37.149 84.455 Z"/>
               <path fill="none" stroke="#FFFFFF" stroke-opacity="0.6" stroke-width="1"
-                    vector-effect="non-scaling-stroke"
                     stroke-linecap="round" stroke-linejoin="round"
                     d="M 0.000 53.212 C 16.699 49.140 15.163 80.926 37.149 84.455 C 59.136 87.983 65.681 55.683 75.701 48.626 C 85.720 41.569 95.217 -2.093 111.915 0.078 C 128.614 2.250 138.915 32.055 152.831 34.770 C 166.746 37.484 162.534 58.940 175.614 72.240 C 188.695 85.540 198.814 105.379 215.234 102.665 C 231.654 99.951 243.058 64.599 250.851 63.514 C 258.644 62.428 260.499 65.213 267.178 68.198 C 273.858 71.184 275.806 84.455 290.000 84.455"/>
             </svg>
@@ -231,16 +230,16 @@
         <!-- ---------- allocation column (328 of 1198) ---------- -->
         <div class="board__col board__col--allocation" data-board-col1>
 
-          <article class="board-card board-card--blur board-card--allocation">
+          <article class="board-card board-card--allocation">
             <span class="bc__item dot dot--filled" style="--x:28; --y:29"></span>
             <p class="bc__item card__label" style="--x:63; --y:34">Target allocation</p>
             <span class="bc__item tl-line" style="--x:38.5; --y:55; --len:185"></span>
 
-            <p class="bc__item stat" style="--x:63;  --y:78">60%</p>
-            <p class="bc__item stat stat--sep" style="--x:161; --y:78">/</p>
-            <p class="bc__item stat" style="--x:200; --y:78">40%</p>
-            <p class="bc__item stat__unit" style="--x:63;  --y:120">equity</p>
-            <p class="bc__item stat__unit" style="--x:200; --y:120">bonds</p>
+            <p class="bc__item stat fig-box" style="--x:63;  --y:78; --w:72">60%</p>
+            <p class="bc__item stat stat--sep fig-box" style="--x:161; --y:78; --w:13">/</p>
+            <p class="bc__item stat fig-box" style="--x:200; --y:78; --w:72">40%</p>
+            <p class="bc__item stat__unit fig-box" style="--x:63;  --y:120; --w:38">equity</p>
+            <p class="bc__item stat__unit fig-box" style="--x:200; --y:120; --w:40">bonds</p>
 
             <p class="bc__item pill pill--card" style="--x:63; --y:166">Rebalance needed</p>
             <p class="bc__item card__note" style="--x:63; --y:203">Bond allocation drifted 4.2%</p>
@@ -257,28 +256,27 @@
             <p class="bc__item card__label card__label--dim" style="--x:63; --y:338">next review: Q4</p>
           </article>
 
-          <article class="board-card board-card--blur board-card--value">
+          <article class="board-card board-card--value">
             <p class="bc__item card__label" style="--x:28; --y:29">Whitmore Family Trust</p>
-            <p class="bc__item value" style="--x:28; --y:70">$18,420,500</p>
-            <p class="bc__item value__delta" style="--x:216; --y:79">&#9650; 2.4%</p>
+            <p class="bc__item value fig-box" style="--x:28; --y:70; --w:178">$18,420,500</p>
+            <p class="bc__item value__delta fig-box" style="--x:216; --y:79; --w:50">&#9650; 2.4%</p>
 
             <svg class="bc__item chart-grid" style="--x:28; --y:121"
                  viewBox="0 0 274 120" preserveAspectRatio="none"
                  aria-hidden="true" focusable="false" data-chart-grid></svg>
 
             <svg class="bc__item trend" style="--x:19; --y:132"
-                 viewBox="0 0 260 117" aria-hidden="true" focusable="false">
+                 viewBox="0 0 290 117" aria-hidden="true" focusable="false">
               <defs>
                 <linearGradient id="signalTrendFill" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0" stop-color="#D9D9D9" stop-opacity="0.1"/>
                   <stop offset="1" stop-color="#737373" stop-opacity="0"/>
                 </linearGradient>
               </defs>
-              <path fill="url(#signalTrendFill)" d="M 33.306 84.455 C 13.594 80.926 14.971 49.140 0.000 53.212 L 0.000 117.000 L 260.000 117.000 L 260.000 84.455 C 247.274 84.455 245.528 71.184 239.539 68.198 C 233.551 65.213 231.887 62.428 224.901 63.514 C 217.914 64.599 207.690 99.951 192.968 102.665 C 178.247 105.379 169.175 85.540 157.447 72.240 C 145.720 58.940 149.497 37.484 137.021 34.770 C 124.545 32.055 115.309 2.250 100.338 0.078 C 85.367 -2.093 76.852 41.569 67.869 48.626 C 58.887 55.683 53.018 87.983 33.306 84.455 Z"/>
+              <path fill="url(#signalTrendFill)" d="M 37.149 84.455 C 15.163 80.926 16.699 49.140 0.000 53.212 L 0.000 117.000 L 290.000 117.000 L 290.000 84.455 C 275.806 84.455 273.858 71.184 267.178 68.198 C 260.499 65.213 258.644 62.428 250.851 63.514 C 243.058 64.599 231.654 99.951 215.234 102.665 C 198.814 105.379 188.695 85.540 175.614 72.240 C 162.534 58.940 166.746 37.484 152.831 34.770 C 138.915 32.055 128.614 2.250 111.915 0.078 C 95.217 -2.093 85.720 41.569 75.701 48.626 C 65.681 55.683 59.136 87.983 37.149 84.455 Z"/>
               <path fill="none" stroke="#FFFFFF" stroke-opacity="0.6" stroke-width="1"
-                    vector-effect="non-scaling-stroke"
                     stroke-linecap="round" stroke-linejoin="round"
-                    d="M 0.000 53.212 C 14.971 49.140 13.594 80.926 33.306 84.455 C 53.018 87.983 58.887 55.683 67.869 48.626 C 76.852 41.569 85.367 -2.093 100.338 0.078 C 115.309 2.250 124.545 32.055 137.021 34.770 C 149.497 37.484 145.720 58.940 157.447 72.240 C 169.175 85.540 178.247 105.379 192.968 102.665 C 207.690 99.951 217.914 64.599 224.901 63.514 C 231.887 62.428 233.551 65.213 239.539 68.198 C 245.528 71.184 247.274 84.455 260.000 84.455"/>
+                    d="M 0.000 53.212 C 16.699 49.140 15.163 80.926 37.149 84.455 C 59.136 87.983 65.681 55.683 75.701 48.626 C 85.720 41.569 95.217 -2.093 111.915 0.078 C 128.614 2.250 138.915 32.055 152.831 34.770 C 166.746 37.484 162.534 58.940 175.614 72.240 C 188.695 85.540 198.814 105.379 215.234 102.665 C 231.654 99.951 243.058 64.599 250.851 63.514 C 258.644 62.428 260.499 65.213 267.178 68.198 C 273.858 71.184 275.806 84.455 290.000 84.455"/>
             </svg>
           </article>
         </div>
