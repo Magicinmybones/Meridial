@@ -1096,24 +1096,40 @@ img, svg { display: block; }
 
 /* The board's first column is a spacer while the travel runs: the hero's panel
    stands in its place, so painting it too would double the cards. */
-.morph-ready [data-board-col1] { visibility: hidden; }
+.morph-ready:not(.signal-shown) [data-board-col1] { visibility: hidden; }
 
 /* Everything the signal section adds arrives after the swap — the new content
    coming in once the panel has taken the screen. */
-/* The box forms around the cards as they arrive rather than appearing after
-   them: it comes in fractionally under size, so the cards read as settling
-   into it. */
-.morph-ready .board {
-  transform: scale(0.985);
-  transform-origin: 50% 40%;
-}
-.signal-in .board {
-  transform: scale(1);
-  transition: opacity calc(var(--morph-dur) * 0.35) var(--morph-ease),
-              transform calc(var(--morph-dur) * 0.45) var(--morph-ease);
+/* Measured off the recording, frame by frame, from the moment the travel lands
+   (f332): the cards sit alone for 8 frames, the box then grows in from its top
+   edge over 18 frames, and the section's own elements arrive 26 frames after
+   that. The box arrives *behind* the settled cards — it is a layer of its own
+   so that growing it cannot squash the column standing on top of it. */
+.board { background: none; }
+
+.board::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(180deg, var(--surface-top) 0%, rgba(25, 25, 25, 0.4) 100%);
+  transform-origin: 50% 0;
 }
 
-.morph-ready .board,
+.morph-ready .board::before {
+  opacity: 0;
+  transform: scaleY(0.7);
+}
+.signal-in .board::before {
+  opacity: 1;
+  transform: scaleY(1);
+  transition: opacity 300ms var(--morph-ease) 130ms,
+              transform 300ms var(--morph-ease) 130ms;
+}
+
+/* The cards keep their own stacking above the box that arrives behind them. */
+.morph-ready [data-board-col1] { position: relative; z-index: 1; }
+
 .morph-ready [data-reveal='board-mid'],
 .morph-ready [data-reveal='board-end'],
 .morph-ready [data-reveal='signal-title'],
@@ -1121,17 +1137,15 @@ img, svg { display: block; }
   animation: none;
   opacity: 0;
 }
-.signal-in .board,
 .signal-in [data-reveal='board-mid'],
 .signal-in [data-reveal='board-end'],
 .signal-in [data-reveal='signal-title'],
 .signal-in [data-reveal='signal-masthead'] {
   opacity: 1;
-  transition: opacity calc(var(--morph-dur) * 0.45) var(--morph-ease);
+  transition: opacity 200ms var(--morph-ease) 430ms;
 }
-.signal-in [data-reveal='board-mid'] { transition-delay: 60ms; }
-.signal-in [data-reveal='board-end'] { transition-delay: 120ms; }
-.signal-in [data-reveal='signal-title'] { transition-delay: 180ms; }
+.signal-in [data-reveal='signal-masthead'] { transition-delay: 380ms; }
+.signal-in [data-reveal='signal-title'] { transition-delay: 500ms; }
 
 /* --------------------------------------------------------------------------
    19. Motion preferences, continued

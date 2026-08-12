@@ -98,33 +98,38 @@ stylesheet still owes, and §10 is where it belongs.
 ## Motion
 
 **The site never scrolls.** One screen, `overflow: hidden`, both sections
-stacked on it. Moving between them is a transition, so no scrollbar exists in
-either axis — asserted directly.
+stacked on it. Moving between them is a transition, not a scroll position.
 
-**Only one section is ever painted.** The signal section is `visibility:
-hidden` until the travel finishes; the hero is hidden the moment it takes over.
-Nothing of the second section overlaps the first and no element is ever drawn
-twice. Verified at rest:
+**Only one section is ever painted.** The signal section is hidden until the
+travel lands; the hero is hidden the moment it takes over. Nothing overlaps and
+nothing is drawn twice.
 
-| | rest | travelling | after the swap |
-|---|---|---|---|
-| signal section | hidden | hidden | visible |
-| hero section | visible | visible | hidden |
-| hero glow transform | none | `scale(2.82)` to full screen | held |
-| hero panel transform | none | `translate(-1170px, +91px) scale(1.29)` | held |
+### The sequence, read frame by frame at 60fps
 
-What moves is the hero's own elements: its glow expands until it owns the
-screen and becomes the second section's background, its panel carries the two
-cards left into the board's first column, and its text column clears to the
-left. The swap at the end is a single frame and is invisible because by then
-the hero's glow and panel sit exactly where the signal section draws its own.
-The board's first column is a spacer while the travel runs, so the cards are
-never doubled.
+| frames | duration | what happens |
+|---|---|---|
+| 272–332 | 1000ms | the hero's texture expands to become the second section's background, while its panel carries the two cards left |
+| 332–340 | 130ms | the cards sit settled, **alone** — nothing else on screen |
+| 340–358 | 300ms | the box grows in from its top edge, **behind** the cards |
+| 358–365 | 200ms | the section's own elements arrive inside it |
 
-The hero itself is untouched by any of this — no rule in §17 or §18 changes its
-layout, and all nine viewports still pass every assertion above.
+That hold — the cards alone for eight frames before anything else appears — is
+the part that reads as the cards "arriving", and it only shows up frame by
+frame. Sampling every fourth or sixth frame hides it entirely, which is how it
+was missed on the first three passes.
+
+The box is a layer of its own (`.board::before`) rather than the element's own
+background, so growing it cannot squash the column standing on top of it, and
+the cards keep their stacking above it.
+
+Verified state by state at 1920x1080:
+
+| | rest | after the swap |
+|---|---|---|
+| signal section | hidden | visible |
+| hero section | visible | hidden |
+| board column one | hidden (the hero's panel stands in) | visible |
 
 **Not verifiable here.** CSS transitions need produced frames, and headless
-Chromium starves them once the page goes idle. The end states, the classes and
-the measured transforms are asserted; the interpolation between them — how the
-motion actually feels — needs a real browser.
+Chromium starves them once the page goes idle. End states, classes and measured
+transforms are asserted; the interpolation between them needs a real browser.
