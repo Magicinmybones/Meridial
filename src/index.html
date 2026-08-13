@@ -406,7 +406,13 @@
         </div>
       </div>
 
-      <p class="signal__title" data-reveal="signal-title">Every advisor, every client, one clear signal</p>
+      <!-- The inner span is what the wipe masks. The paragraph spans the full
+           board so the line stays centred; masking that box would measure the
+           wipe against the board's width instead of the sentence's, and the
+           reveal would run ahead of itself by however much slack sits either
+           side. The span hugs the text, so the measured percentages hold at
+           any width and with any substituted face. -->
+      <p class="signal__title"><span data-reveal="signal-title">Every advisor, every client, one clear signal</span></p>
     </div>
   </section>
   </div>

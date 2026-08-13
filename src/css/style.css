@@ -771,7 +771,15 @@ img, svg { display: block; }
   line-height: 1;
   letter-spacing: var(--track-tight);
   text-align: center;
-  background: linear-gradient(180deg, #ffffff 0%, #999999 100%);
+}
+
+/* The wash lives on the inner span, not the paragraph. The span is what the
+   closing wipe masks (§18), and a masked child cannot show through an
+   ancestor's `background-clip: text` — the same trap the hero's title lines
+   hit. Clipping the gradient to the span's own text keeps both. */
+.signal__title > span {
+  display: inline-block;
+  background-image: linear-gradient(180deg, #ffffff 0%, #999999 100%);
   -webkit-background-clip: text;
           background-clip: text;
   color: transparent;
@@ -1264,8 +1272,7 @@ img, svg { display: block; }
 .morph-ready [data-board-col1] { position: relative; z-index: 1; }
 
 .morph-ready [data-reveal='board-mid'],
-.morph-ready [data-reveal='board-end'],
-.morph-ready [data-reveal='signal-title'] {
+.morph-ready [data-reveal='board-end'] {
   animation: none;
   opacity: 0;
 }
@@ -1273,16 +1280,48 @@ img, svg { display: block; }
    over mid-slide at the swap. It must be there the moment the section is. */
 .morph-ready [data-reveal='signal-masthead'] { animation: none; opacity: 1; }
 .signal-in [data-reveal='board-mid'],
-.signal-in [data-reveal='board-end'],
-.signal-in [data-reveal='signal-title'] {
+.signal-in [data-reveal='board-end'] {
   opacity: 1;
   transition: opacity 200ms var(--morph-ease) 390ms;
 }
-/* The closing line is the last thing to arrive, well after the columns —
-   measured: a ~380ms fade beginning ~900ms after the swap, in place. */
+
+/* The closing line is not a fade. Tracked in ten vertical slices across the
+   line, it is *uncovered* left to right: the band's edge energy holds flat at
+   the wash's own value for 900ms after the swap, then the leading 57% arrives
+   in a single frame and the remainder sweeps in at a steady 1.36% of the line
+   per frame, the last slice completing 566ms later. Each 87px slice takes
+   ~167ms to go from nothing to full while the edge advances ~11px per frame,
+   which puts the edge's softness at about 110px — 12.5% of the line.
+
+   So: a mask whose soft edge travels, not an opacity. `--wipe` is the position
+   of the transparent end; the opaque end trails it by the measured 12.5%, so
+   the edge's midpoint sits 6.25% behind. It starts at 63.25% — midpoint 57% —
+   and runs to 112.5%, where the whole line is clear.
+
+   `forwards` rather than `both` on purpose: through the 900ms delay the
+   element keeps its own `--wipe: 0%` and stays fully covered. `backwards`
+   would apply the keyframe's start value and show 57% of the line early. */
+@property --wipe {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 0%;
+}
+
+.morph-ready [data-reveal='signal-title'] {
+  animation: none;
+  opacity: 1;
+  --wipe: 0%;
+  -webkit-mask-image: linear-gradient(90deg,
+    #000 0 calc(var(--wipe) - 12.5%), transparent var(--wipe));
+          mask-image: linear-gradient(90deg,
+    #000 0 calc(var(--wipe) - 12.5%), transparent var(--wipe));
+}
 .signal-in [data-reveal='signal-title'] {
-  transition-duration: 380ms;
-  transition-delay: 900ms;
+  animation: signal-wipe 566ms linear 900ms forwards;
+}
+@keyframes signal-wipe {
+  from { --wipe: 63.25%; }
+  to   { --wipe: 112.5%; }
 }
 
 /* --------------------------------------------------------------------------
@@ -1294,8 +1333,8 @@ img, svg { display: block; }
   .is-ready [data-reveal] { animation: none; }
   .morph-ready [data-reveal='board-mid'],
   .morph-ready [data-reveal='board-end'],
-  .morph-ready [data-reveal='signal-title'],
   .morph-ready [data-reveal='signal-masthead'] { opacity: 1; }
+  .morph-ready [data-reveal='signal-title'] { --wipe: 112.5%; }
   .morph-ready .hero__glow { transition: none; }
   .morph-ready .panel { transform: none !important; }
   .morph-ready .hero__content { opacity: 1; transform: none; }
