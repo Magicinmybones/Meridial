@@ -288,9 +288,31 @@
     return { measure: measure, listen: listen };
   }
 
+  /**
+   * Hand each revealed element back to the cascade once its reveal has played.
+   *
+   * The reveal fills forwards, and a filled animation outranks a normal
+   * declaration for as long as it is attached — so an element that has
+   * finished revealing cannot afterwards be faded by anything else. That is
+   * fine for most of the hero, and wrong for the marquee and the panel's
+   * caption, which the travel has to fade out. Marking them released drops the
+   * animation and leaves the stylesheet in charge again.
+   */
+  function releaseReveals() {
+    document.addEventListener('animationend', function (e) {
+      if (e.animationName !== 'reveal') return;
+      var el = e.target;
+      if (el.hasAttribute && el.hasAttribute('data-reveal')) {
+        el.classList.add('is-revealed');
+        el.style.willChange = '';
+      }
+    }, true);
+  }
+
   function init() {
     buildChartGrid();
     measureMarquee();
+    releaseReveals();
 
     var move = Transition();
     if (move) {

@@ -204,6 +204,80 @@ stacked on it. Moving between them is a transition, not a scroll position.
 travel lands; the hero is hidden the moment it takes over. Nothing overlaps and
 nothing is drawn twice.
 
+### The hero's entry, tracked per element at 60fps
+
+Frames stream from the recording as raw greyscale and are measured in place —
+an edge-energy curve per element per frame, normalised against the settled hero
+and crossed at 5% and 95%. Times are relative to the black frame at f28, where
+the loop restarts.
+
+| element | delay | duration |
+|---|---|---|
+| masthead | 70ms | 615ms |
+| glow | 90ms | 970ms |
+| title line 1 | 267ms | 483ms |
+| title line 2 | 417ms | 450ms |
+| title line 3 | 567ms | 467ms |
+| subtitle | 833ms | 617ms |
+| buttons | 833ms | 600ms |
+| marquee | 850ms | 600ms |
+| eyebrow pill | 1017ms | **50ms** |
+| panel title & caption | 1675ms | 760ms |
+| card one, shell | 1783ms | 350ms |
+| card two, shell | 1867ms | 350ms |
+| 'Target allocation' + its dot | 2000ms | 300ms |
+| '+7.2% YTD' + its dot | 2117ms | 417ms |
+| the dashed rail | 2133ms | 333ms |
+| 'Whitmore Family Trust' | 2317ms | 350ms |
+| 'next review: Q3' + dot + connector | 2367ms | 417ms |
+| '60% / 40%' | 2383ms | 100ms |
+| 'equity' / 'bonds' | 2467ms | 50ms |
+| '$18,420,500' and its delta | 2533ms | 350ms |
+| 'Rebalance needed' | 2550ms | 50ms |
+| 'next review: Q4' + dot + connector | 2600ms | 383ms |
+| chart | 2667ms | 367ms |
+| 'Bond allocation drifted 4.2%' | 2683ms | 183ms |
+
+Three findings changed the implementation.
+
+**The ramp is linear.** Sampled at each tenth of their rise, the masthead, the
+glow, the subtitle and the buttons all track a straight line to within 0.02,
+where the eased curve they were authored with was already at 0.42 by three
+tenths.
+
+**The title's stagger is 150ms, not 70ms.** The three lines start at 267, 417
+and 567 and each runs about 470ms. Earlier bands put them at 210 / 280 / 350
+because the bands overlapped: line one's descenders fall inside line two's
+box, so a rect stepped by the 96-unit line pitch measures its neighbour before
+it measures itself. Reading the ink bands off a settled frame (518–581,
+624–677, 720–772 in video rows) separates them.
+
+**The panel is a second act.** The two cards do not fade in as one block at
+1030ms. Their shells arrive at about 1780ms — measured as the collapse of
+texture variance inside a blank patch of each card, 18.7 to 0.7 as the panel
+covers the glow behind it — and their contents then arrive one at a time over
+the following second, finishing at 3050ms. That is why the card rects appear to
+*lose* energy around f126: the smooth panel is covering the noisy texture. The
+first pass read that dip as the cards fading out.
+
+Each card item now carries its own delay and duration in the markup, as data in
+the same sense as `--x` and `--y`: the artboard says where, the recording says
+when. Read back through `getAnimations()`, all 36 animated elements carry
+exactly the values above, all linear.
+
+Two faults surfaced while wiring it up, both from the reveal filling forwards:
+
+- A filled animation outranks a normal declaration for as long as it is
+  attached, so an element that had finished revealing could not afterwards be
+  faded by anything else. The marquee carries `data-reveal`, so the travel had
+  **never** been able to fade it out. Reveals now release on `animationend`,
+  handing the property back to the cascade.
+- Several of these elements rest below full opacity — the drift note at 0.4,
+  the two future reviews and their connectors at 0.2, the separator at 0.3, the
+  chart grid at 0.45. Animating them to 1 made each overshoot and snap back at
+  the moment of release. The keyframe now ends at `var(--o)`, the same token
+  that states the resting value.
+
 ### The choreography, tracked per element at 60fps
 
 Every element was tracked through frames 240-430 — edge-energy and landmark
