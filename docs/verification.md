@@ -91,6 +91,51 @@ Text-heavy regions cannot be corroborated more precisely: the reference export
 embedded in the `.fig` is 359 × 269, at which size its type is illegible. It
 confirms placement, tone and mass; the numeric extraction covers the rest.
 
+### Stored colour is not painted colour
+
+The board carried three colours the artboard never paints: a green radar
+outline, a chartreuse hatch bitmap, and three blue indicator chips. All three
+are in the file, and none of them renders.
+
+- `Area 1`'s stroke is `#4AFAA9`, bound to a library variable. The artboard
+  resolves it monochrome.
+- Its fill is a bitmap of chartreuse lines (`#D7FF5E` on transparent), themed
+  the same way.
+- The chips are instances of one indicator component whose master is
+  `#32A7D4`. Each instance overrides it — the first to `#1C1C1C`, which all
+  but vanishes against the card, the other two to white with near-black text.
+  Reading the master instead of the overrides is what produced three blue
+  pills.
+- The bar hatch is an instance of the same line component, whose 144 line
+  children are `#8E62EF` in the file.
+
+Sampled across the whole region of the reference render, every channel comes
+back equal — R = G = B at every point. The rendered values are the
+specification; the stored ones are a theme away from it. The texture asset is
+now rewritten with its RGB forced to white and its alpha untouched, so the
+pattern's geometry and feathering stay byte-identical and only the hue changes.
+
+Two hatch faults came out of the same pass, both measured by autocorrelation
+along a scan line rather than by eye:
+
+| hatch | reference | before | after |
+|---|---|---|---|
+| radar | 8.65 units | 2.89 | 8.46 |
+| bars | 11.56 units | 11.55 | 11.55 |
+
+The radar's was three times too dense because the bitmap was being *stretched*
+into the polygon. The artboard crops it instead: the paint transform maps the
+node's box onto the middle third of the image's width (`m00` 0.3333, `m02`
+0.3333) and the middle 39.3% of its height (`m11` 0.39266, `m12` 0.30367) —
+one uniform 0.7443 scale, so 530 × 414 draws at 394.5 × 308.1, offset to put
+that crop at the origin.
+
+The bars' period was already right but the contrast was not: a horizontal scan
+across a bar in the reference sweeps 0 to 82 of 255, where ours reached 18. The
+stops now ramp to 0.32 white and back rather than switching on and off, because
+the artboard's lines are feathered at this scale. Measured after: 13–88 against
+the reference's 0–81.
+
 ### The two panel cards
 
 The recording gives a better reference than the embedded export: at 1800 × 1350
