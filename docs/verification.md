@@ -301,7 +301,54 @@ closed menu that keeps its box swallows every click aimed at that control, so
 the closed state is `visibility: hidden` in CSS rather than an attribute
 toggled from script.
 
-Handheld is still not addressed.
+## Mobile
+
+Measured the same way. The tablet composition fits 917 units across, so on a
+phone `--u` collapses and every length with it:
+
+| viewport | subtitle | card label | button |
+|---|---|---|---|
+| 600 × 960 * | 13.1px | 7.8px | 40px |
+| 500 × 890 | 10.9px | 6.5px | 34px |
+| 430 × 932 | 9.4px | 5.6px | 29px |
+| 390 × 844 | 8.5px | 5.1px | 26px |
+| 844 × 390 ** | 6.7px | 4.0px | 21px |
+
+\* the narrowest size the tablet layout holds at &nbsp;&nbsp; \*\* a phone on its
+side, which falls through to desktop
+
+The tablet architecture is sound down to 600 and degrades below it, so mobile
+starts at 599. The second clause of the query — `(max-height: 479px) and
+(max-width: 1023px)` — catches the phone held sideways.
+
+**The one concession is that a phone scrolls.** Both wider architectures put a
+whole composition on one screen; a phone cannot. The panel alone is 386 + 11 +
+264 of card and another 122 of caption, and the board is six cards deep.
+Holding that to one screen means a unit near 0.35 and body text near 6px, which
+is the one thing ruled out ahead of viewport fitting. Everything else is
+preserved: every element, the load reveal, the marquee, the menu, the design
+language.
+
+The travel goes with it. It is a shared-element morph between two full-screen
+compositions and neither endpoint is on screen at once here, so it cannot be
+adapted, only faked. `--morph: 0` tells the script to leave the gesture alone —
+the breakpoint stays with the media queries that own it, and the script has no
+width check of its own — and the signal section stands below the hero with its
+own content shown.
+
+The unit is 447 across: the widest board card is 407, plus a 20-unit gutter
+each side. The 328-unit cards stretch to meet it, which is safe because their
+contents anchor left, where a card *narrower* than its artboard width draws its
+own text past its edge. It caps at 0.95 so the step across the boundary is a
+step and not a cliff — an uncapped reference would hand 599 a unit of 1.34
+against tablet's 0.654 at 600, the same body text at twice the size one pixel
+apart.
+
+Result across 19 viewports from 1440 × 900 to 320 × 568: no card draws past its
+own edge, no horizontal overflow anywhere, desktop and tablet still exactly one
+screen with their values unchanged, and every mobile size readable — 14.3px to
+19px body, 8.6px to 11.4px card labels, buttons 44px and over, the burger held
+at a 44px minimum.
 
 ## Motion
 
