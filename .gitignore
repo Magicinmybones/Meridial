@@ -1,24 +1,66 @@
-# OS
-.DS_Store
-Thumbs.db
+# What belongs in this repository is the site (src/), the harness that proves
+# it (tools/), the docs, and the two deploy configs. Everything below is
+# generated, local, or licensed — none of it should ever be committed.
 
-# Editors
+# --- OS ---------------------------------------------------------------------
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+desktop.ini
+
+# --- Editors ----------------------------------------------------------------
 .vscode/
 .idea/
 *.swp
+*.swo
+*~
 
-# Logs and local scratch
-*.log
-.cache/
-tmp/
+# --- Licensed typefaces -----------------------------------------------------
+# See docs/typography.md. Suisse Intl is dropped in locally and must not be
+# redistributed through this repository. The open faces that stand in for it
+# are committed deliberately.
+src/assets/fonts/SuisseIntl-*
 
-# Licensed typefaces — see docs/typography.md. These are dropped in locally and
-# must not be redistributed through this repository.
-src/assets/fonts/SuisseIntl-*.otf
-src/assets/fonts/SuisseIntl-*.ttf
-src/assets/fonts/SuisseIntl-*.woff2
-
-# Layout verification scratch (tools/verify-layout.py)
+# --- Verification harness output --------------------------------------------
+# tools/verify-layout.py copies the site, serves it, and writes screenshots.
 tools/.probe-site/
 tools/.shots/
 __pycache__/
+*.py[cod]
+.pytest_cache/
+
+# --- Browser automation -----------------------------------------------------
+# Playwright and friends, if a future harness reaches for them.
+node_modules/
+test-results/
+playwright-report/
+blob-report/
+.playwright/
+
+# --- Local environments -----------------------------------------------------
+.env
+.env.*
+!.env.example
+venv/
+.venv/
+
+# --- Deploy -----------------------------------------------------------------
+.vercel/
+.netlify/
+dist/
+build/
+
+# --- Working files ----------------------------------------------------------
+# Design sources and recordings are references, not deliverables — they are
+# read once to extract numbers and assets, and the numbers live in the CSS.
+*.fig
+*.mp4
+*.mov
+*.webm
+*.zip
+*.log
+.cache/
+tmp/
+scratch/
