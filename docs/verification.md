@@ -303,8 +303,15 @@ toggled from script.
 
 ## Mobile
 
-Measured the same way. The tablet composition fits 917 units across, so on a
-phone `--u` collapses and every length with it:
+Not a third architecture — the tablet one, tuned. The tablet query
+`(max-width: 1023px) and (max-aspect-ratio: 5/4)` already matches every phone,
+so mobile inherits all of it: one screen that never scrolls, content above and
+the panel in its glow band below, the card pair, the board as three rows of
+two, the burger and its menu, and the travel between the sections exactly as it
+is there. The mobile block changes the unit and a handful of proportions,
+nothing else.
+
+Where it starts:
 
 | viewport | subtitle | card label | button |
 |---|---|---|---|
@@ -314,235 +321,35 @@ phone `--u` collapses and every length with it:
 | 390 × 844 | 8.5px | 5.1px | 26px |
 | 844 × 390 ** | 6.7px | 4.0px | 21px |
 
-\* the narrowest size the tablet layout holds at &nbsp;&nbsp; \*\* a phone on its
+\* the narrowest size the tablet unit holds at &nbsp;&nbsp; \*\* a phone on its
 side, which falls through to desktop
 
-The tablet architecture is sound down to 600 and degrades below it, so mobile
-starts at 599. The second clause of the query — `(max-height: 479px) and
-(max-width: 1023px)` — catches the phone held sideways.
+The tablet unit fits 917 units across — the closing line, which on a phone is
+free to take two lines — and 1470 down. Below 600 that leaves too little, so
+the references tighten to 866 across (the board's two 407-unit cards plus their
+gap, padding and gutter, now the widest thing on screen) and 1450 down.
 
-**The one concession is that a phone scrolls.** Both wider architectures put a
-whole composition on one screen; a phone cannot. The panel alone is 386 + 11 +
-264 of card and another 122 of caption, and the board is six cards deep.
-Holding that to one screen means a unit near 0.35 and body text near 6px, which
-is the one thing ruled out ahead of viewport fitting. Everything else is
-preserved: every element, the load reveal, the marquee, the menu, the design
-language.
+The board's two 407-unit cards set the width and cannot be narrowed: their
+contents sit at fixed artboard coordinates, so a narrower card draws its own
+text past its edge. What is left to claw back is the space around them — the
+gutter drops from 35 units to 14, the board's padding from 14 to 8, its gaps
+from 12 to 8 — and the display and closing line step down, because at their
+artboard sizes a single line is wider than the phone.
 
-The travel goes with it. It is a shared-element morph between two full-screen
-compositions and neither endpoint is on screen at once here, so it cannot be
-adapted, only faked. `--morph: 0` tells the script to leave the gesture alone —
-the breakpoint stays with the media queries that own it, and the script has no
-width check of its own — and the signal section stands below the hero with its
-own content shown.
+The boundary is continuous by construction: 600 gives 13.1px body and a 7.8px
+card label, 599 gives 13.2px and 7.9px. One pixel of width, one tenth of a
+pixel of type.
 
-The unit is 447 across: the widest board card is 407, plus a 20-unit gutter
-each side. The 328-unit cards stretch to meet it, which is safe because their
-contents anchor left, where a card *narrower* than its artboard width draws its
-own text past its edge. It caps at 0.95 so the step across the boundary is a
-step and not a cliff — an uncapped reference would hand 599 a unit of 1.34
-against tablet's 0.654 at 600, the same body text at twice the size one pixel
-apart.
+Across 14 viewports from 1440 × 900 to 320 × 568: every section still exactly
+one screen, no scroll in either axis, no card drawing past its own edge, no
+horizontal overflow, and the travel running both ways at phone sizes.
 
-Result across 19 viewports from 1440 × 900 to 320 × 568: no card draws past its
-own edge, no horizontal overflow anywhere, desktop and tablet still exactly one
-screen with their values unchanged, and every mobile size readable — 14.3px to
-19px body, 8.6px to 11.4px card labels, buttons 44px and over, the burger held
-at a 44px minimum.
+**The cost is honest and worth stating.** Six dashboard cards on a 390px screen
+at one screen each puts the card label at 5.4px and the subtitle at 9px. That
+is what holding the whole composition to a single screen costs at this width;
+the alternative is letting the page scroll, which buys 14–19px body text and
+loses the travel, since a shared-element morph needs both of its endpoints on
+screen at once.
 
-## Motion
-
-**The site never scrolls.** One screen, `overflow: hidden`, both sections
-stacked on it. Moving between them is a transition, not a scroll position.
-
-**Only one section is ever painted.** The signal section is hidden until the
-travel lands; the hero is hidden the moment it takes over. Nothing overlaps and
-nothing is drawn twice.
-
-### The hero's entry, tracked per element at 60fps
-
-Frames stream from the recording as raw greyscale and are measured in place —
-an edge-energy curve per element per frame, normalised against the settled hero
-and crossed at 5% and 95%. Times are relative to the black frame at f28, where
-the loop restarts.
-
-| element | delay | duration |
-|---|---|---|
-| masthead | 70ms | 615ms |
-| glow | 90ms | 970ms |
-| title line 1 | 267ms | 483ms |
-| title line 2 | 417ms | 450ms |
-| title line 3 | 567ms | 467ms |
-| subtitle | 833ms | 617ms |
-| buttons | 833ms | 600ms |
-| marquee | 850ms | 600ms |
-| eyebrow pill | 1017ms | **50ms** |
-| panel title & caption | 1675ms | 760ms |
-| card one, shell | 1783ms | 350ms |
-| card two, shell | 1867ms | 350ms |
-| 'Target allocation' + its dot | 2000ms | 300ms |
-| '+7.2% YTD' + its dot | 2117ms | 417ms |
-| the dashed rail | 2133ms | 333ms |
-| 'Whitmore Family Trust' | 2317ms | 350ms |
-| 'next review: Q3' + dot + connector | 2367ms | 417ms |
-| '60% / 40%' | 2383ms | 100ms |
-| 'equity' / 'bonds' | 2467ms | 50ms |
-| '$18,420,500' and its delta | 2533ms | 350ms |
-| 'Rebalance needed' | 2550ms | 50ms |
-| 'next review: Q4' + dot + connector | 2600ms | 383ms |
-| chart | 2667ms | 367ms |
-| 'Bond allocation drifted 4.2%' | 2683ms | 183ms |
-
-Three findings changed the implementation.
-
-**The ramp is linear.** Sampled at each tenth of their rise, the masthead, the
-glow, the subtitle and the buttons all track a straight line to within 0.02,
-where the eased curve they were authored with was already at 0.42 by three
-tenths.
-
-**The title's stagger is 150ms, not 70ms.** The three lines start at 267, 417
-and 567 and each runs about 470ms. Earlier bands put them at 210 / 280 / 350
-because the bands overlapped: line one's descenders fall inside line two's
-box, so a rect stepped by the 96-unit line pitch measures its neighbour before
-it measures itself. Reading the ink bands off a settled frame (518–581,
-624–677, 720–772 in video rows) separates them.
-
-**The panel is a second act.** The two cards do not fade in as one block at
-1030ms. Their shells arrive at about 1780ms — measured as the collapse of
-texture variance inside a blank patch of each card, 18.7 to 0.7 as the panel
-covers the glow behind it — and their contents then arrive one at a time over
-the following second, finishing at 3050ms. That is why the card rects appear to
-*lose* energy around f126: the smooth panel is covering the noisy texture. The
-first pass read that dip as the cards fading out.
-
-Each card item now carries its own delay and duration in the markup, as data in
-the same sense as `--x` and `--y`: the artboard says where, the recording says
-when. Read back through `getAnimations()`, all 36 animated elements carry
-exactly the values above, all linear.
-
-Two faults surfaced while wiring it up, both from the reveal filling forwards:
-
-- A filled animation outranks a normal declaration for as long as it is
-  attached, so an element that had finished revealing could not afterwards be
-  faded by anything else. The marquee carries `data-reveal`, so the travel had
-  **never** been able to fade it out. Reveals now release on `animationend`,
-  handing the property back to the cascade.
-- Several of these elements rest below full opacity — the drift note at 0.4,
-  the two future reviews and their connectors at 0.2, the separator at 0.3, the
-  chart grid at 0.45. Animating them to 1 made each overshoot and snap back at
-  the moment of release. The keyframe now ends at `var(--o)`, the same token
-  that states the resting value.
-
-### The choreography, tracked per element at 60fps
-
-Every element was tracked through frames 240-430 — edge-energy and landmark
-curves per frame, not sampled. Times relative to the travel's start (f272):
-
-| element | behaviour | timing |
-|---|---|---|
-| hero title, subtitle, buttons, marquee | fade out, drifting left | 0–330ms |
-| hero glow / wash edge | **widens** left to own the screen — left edge animates, cover crop recomputes, texture revealed not stretched | 0–1070ms |
-| panel cards | travel left with the panel | 0–1000ms |
-| **masthead nav + CTA** | **slide right — never fade** | 150–1000ms |
-| swap of sections | single frame, geometrically aligned | 1000ms |
-| board box | **top-anchored downward wipe** — top edge pinned, bottom sweeps 132→350, ease-in-out | 1170–1540ms |
-| panel title & caption | **stay where they are** and fade out during the travel's second half | 350–850ms |
-| columns two & three | fade in | ~1470ms |
-| closing line | fades in **last**, in place, slowly | 1900–2280ms |
-
-The masthead finding is the important one: its navigation slides from the
-hero's column-bound layout to the signal's full-width one (CTA x388→x615 in
-the 720-wide reference), handing over at the swap. Every delta is measured
-from the two laid-out mastheads at runtime — nothing is hardcoded, so the
-slide is correct at every viewport.
-
-### The masthead's step down
-
-The two mastheads have to sit at the same height or the navigation moves at the
-swap, and they did not. The signal shell is 1161 units tall and centres inside
-the screen, so whenever the viewport is proportionally taller than the artboard
-— any aspect below 1606/1161 — it sits inset from the top and carries its
-masthead down with it, while the hero's is anchored to the section. Measured as
-the difference between the two at rest:
-
-| viewport | before | after |
-|---|---|---|
-| 1920 × 1080 | 0.00px | 0.00px |
-| 1194 × 834 | 0.00px | 0.00px |
-| 1080 × 810 | 13.9px | 0.00px |
-| 1024 × 768 | 13.9px | 0.00px |
-| 834 × 1194 | 26.8px | 0.00px |
-| 912 × 1368 | 33.9px | 0.00px |
-
-The desktop fix subtracts that inset back out of the masthead's own offset, so
-at the aspects where there is no inset the value is unchanged. Tablet anchors
-the shell to the section's top instead and gives its masthead the hero's own
-40-unit offset. Traced per animation frame, the visible masthead now holds one
-y through the whole travel — a range of 0.00px at every viewport, desktop and
-tablet.
-
-### The wordmark's snap
-
-Traced through the travel in a real browser at nine viewports, in both
-directions, sampling every masthead part per animation frame: **nothing in the
-masthead moves vertically** — the hero's top and the signal's agree to 0.00 px
-at every viewport, and the page never scrolls or changes width. The fault was
-horizontal, and it was on the one part of the masthead that was not being
-carried.
-
-The two mastheads sit in the same box — the shell, capped and centred — but
-stated their insets in different terms. The hero's came from `.hero__content`'s
-padding, in units (`35 × --u`); the signal's were a fraction of the artboard
-(`34 / 1606 × 100%`). Those agree only at the artboard's own aspect and drift
-apart everywhere else:
-
-| viewport | wordmark gap, before | after |
-|---|---|---|
-| 1280 × 800 | +2.98 px | −0.69 px |
-| 1440 × 900 | +3.35 px | −0.79 px |
-| 1536 × 864 | +6.49 px | −0.73 px |
-| 1920 × 1080 | +8.09 px | −0.92 px |
-| 2560 × 1440 | +10.78 px | −1.25 px |
-
-The travel slides the navigation and the call to action onto their signal
-positions, so the whole of that drift landed on the wordmark, which snapped
-sideways at the swap — right as everything else settled. Holding both insets in
-units leaves the two boxes differing by the one unit the artboards actually
-differ by (x35 against x34), and the wordmark now travels on the same measured,
-translate-only terms as the other two.
-
-Measured on the frames either side of the handover, the visible masthead is now
-continuous to within **0.05 px** on the wordmark and **0.22 px** on the call to
-action, at every viewport — against 3–11 px before. Confirmed in the recording
-too: the wordmark's left edge holds at one column through the swap where it
-previously stepped across.
-
-Cascade verified with transitions disabled (headless cannot animate them):
-during the travel the nav computes `translateX(334.5px)` and the CTA
-`translateX(661px)` at 1920×1080, the hero body computes opacity 0, the
-masthead stays at 1, and every value returns to rest on the way back.
-
-**The background handover.** The reference keeps the texture at the glow's
-full strength: the settled section-two margins measure 131–146 in luminance,
-where the artboard's 0.2-opacity wash over the dark base would sit near 50.
-The wash is therefore the glow's own declaration at full strength, and the
-glow expands by animating its left edge to the viewport's rather than by
-transform — the cover crop recomputes as it widens, so the texture is
-progressively revealed the way the recording shows instead of being stretched
-2.8×, and at left 0 it renders pixel-identically to the wash it hands over to.
-Verified: glow travels (1239.8, w680.3) → (0, w1920), wash at (0, w1920).
-
-**Only the cards travel.** The panel's title and caption do not follow them:
-their edge energy holds at their own position until ~350ms into the travel,
-then decays over ~500ms, completing before the swap. The travel transform is
-applied to the two cards individually (the same translate — it is
-translate-only), and the title and caption fade where they stand.
-
-**A probe lesson.** `* { transition: none !important }` does not match
-pseudo-elements, so a `::before` transition survives it; under starved frames
-its computed value then freezes at the transition's start, which looks exactly
-like a cascade failure. The kill-switch needs `*, *::before, *::after`.
-
-**Not verifiable here.** CSS transitions need produced frames, and headless
-Chromium starves them once the page goes idle. End states, classes and measured
-transforms are asserted; the interpolation between them needs a real browser.
+Handheld beyond this — a scrolling variant, if the small type proves worse in
+the hand than the lost transition — is the one decision still open.
