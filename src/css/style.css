@@ -1339,3 +1339,333 @@ img, svg { display: block; }
   .morph-ready .panel { transform: none !important; }
   .morph-ready .hero__content { opacity: 1; transform: none; }
 }
+
+/* --------------------------------------------------------------------------
+   20. Tablet architecture
+
+   THE BREAKPOINT, AND WHY IT IS WHERE IT IS
+
+   Measured rather than assumed. The composition is a pure scale — every
+   length is `<artboard number> x --u` — so walking the viewport down from
+   1920 to 744 produces no collision, no overflow and no wrapping fault at any
+   width. Nothing breaks geometrically. What degrades is `--u` itself, and with
+   it legibility and touch size:
+
+     viewport            --u     subtitle   card label   button
+     1366 x 768 *      0.661       13.2px       7.9px      41px
+     1194 x 834        0.718       14.4px       8.6px      45px
+     1080 x 810        0.642       13.4px       8.1px      42px
+     1024 x 768        0.638       12.8px       7.7px      40px
+      962 x 601        0.518       10.4px       6.2px      32px
+      834 x 1194       0.519       10.4px       6.2px      32px
+      768 x 1024       0.478        9.6px       5.7px      30px
+                                          * the smallest shipping desktop size
+
+   Two things follow. First, the landscape tablets are *better* than the
+   smallest size this design already ships at — 1194 x 834 beats 1366 x 768 —
+   so switching them to another architecture would be a downgrade, not a fix.
+   Second, `--u` is `min(100vh/1161, 100vw/1606, 1.35px)`, so it is the
+   viewport's *aspect* that decides which term wins: below the artboard's own
+   1606/1161, width drives it and the design shrinks into a tall screen while
+   the vertical slack goes to waste. That is precisely what a portrait tablet
+   does, and it is the real failure.
+
+   So the transition is not a width. It is: narrow enough that the two-column
+   split can no longer hold a legible content column, *and* proportioned such
+   that stacking is the better use of the space.
+
+       max-width: 1023px     — 1024 x 768 still measures 0.638, within the
+                               range this design already ships
+       max-aspect-ratio: 5/4 — below the artboard's 1.383; above it there is
+                               no vertical room to stack into, and the desktop
+                               split is the right composition anyway
+
+   A short landscape window (962 x 601) therefore keeps the desktop
+   architecture: stacking needs height it does not have. Everything at or above
+   1024px wide is untouched, which is the whole verified desktop range.
+
+   THE TABLET UNIT
+
+   Desktop fits the whole 1606 x 1161 artboard on screen. Tablet cannot — the
+   aspect is wrong — so it stops fitting the artboard and fits the *tablet
+   composition* instead. Across, that is 917 units: the closing line's 847 plus
+   a gutter each side, which is wider than the card pair's 737 and is what
+   actually binds — at 800 x 1280 the line wrapped to two lines and pushed the
+   section 15px past the screen. Down, 1400 units: the signal section's three
+   rows, its masthead and its closing line, which is the taller of the two
+   sections — 1400 of content and 40 held back, so the closing line clears the
+   bottom edge rather than sitting on it. The unit is still one number and
+   every length still reads from it, so nothing below this comment needed a
+   second set of sizes.
+   -------------------------------------------------------------------------- */
+@media (max-width: 1023px) and (max-aspect-ratio: 5/4) {
+
+  :root {
+    --u: min(calc(100vw / 917), calc(100vh / 1440), var(--u-max));
+    --gutter: calc(35 * var(--u));
+  }
+
+  /* ---- hero: one column, the panel below the words --------------------
+     The title keeps its three authored lines because the content column is
+     now the full width: 842 units of title inside ~890 of column. Stacking
+     is what buys that back — in two columns at this width the same title
+     wraps to six lines and the section no longer fits a screen. */
+  /* Content to the top, panel to the bottom. Centring the pair instead let the
+     masthead float down the screen — which put the burger underneath the menu
+     it opens — and left the panel adrift of the band it is supposed to sit in.
+     Distributed, the panel row's height (30 above the cards, 386 of card, then
+     the caption's 34 + 28 + 16 + 44, then 40 below) is exactly the band's 578,
+     so the two agree by construction at every size. */
+  .hero__grid {
+    grid-template-columns: 100%;
+    align-content: space-between;
+  }
+
+  .hero__content {
+    padding-block: calc(40 * var(--u)) 0;
+  }
+
+  /* The stack's own rhythm, tightened from the desktop's 54 to 34 units. The
+     ratios between the blocks are unchanged; only the slack is smaller,
+     because a tablet screen has less of it to give away. */
+  .hero__body { gap: calc(34 * var(--u)); }
+  .hero__head { margin-block-end: 0; }
+  .trusted { margin-block-start: calc(34 * var(--u)); }
+
+  .hero__panel {
+    padding-block: calc(30 * var(--u)) calc(40 * var(--u));
+    justify-content: flex-start;
+  }
+
+  /* The two cards move from a stack to a pair. Section two's first column
+     does the same (below), so the travel between them stays a single
+     translate — the handover is measured at runtime and the two ends remain
+     geometrically identical, exactly as on desktop. */
+  .panel {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    gap: calc(11 * var(--u));
+    inline-size: min(calc(667 * var(--u)), 100%);
+    flex-wrap: wrap;
+  }
+  .panel .card { inline-size: calc(328 * var(--u)); flex: none; }
+  .card--value { margin-block-start: 0; }
+
+  /* The panel's caption belongs under the pair, not beside it. */
+  .panel__title,
+  .panel__caption { flex-basis: 100%; }
+  .panel__title { margin-block-start: calc(34 * var(--u)); }
+
+  /* The glow was the right-hand column; it becomes the band the panel sits
+     in, bleeding to the bottom and both sides. Same declaration, same
+     texture, same radius treatment — a different edge. */
+  .hero__glow {
+    inset-inline: 0;
+    inset-block: auto 0;
+    /* The panel's own content — 386 of card, 34 + 28 of title, 16 + 44 of
+       caption — plus its 30 above and 40 below. Sizing the band from what it
+       holds puts its edge a clear 30 units above the cards rather than hard
+       against the marquee. */
+    block-size: calc(578 * var(--u));
+    border-radius: var(--radius-glow) var(--radius-glow) 0 0;
+  }
+
+  /* ---- masthead: the navigation moves into the menu ------------------- */
+  .masthead { grid-template-columns: 1fr auto; }
+  .masthead .mainnav,
+  .masthead .btn-nav { display: none; }
+  /* Two classes, so it outranks the base `display: none` in §21 regardless of
+     which section of the file comes last. */
+  .masthead .burger { display: flex; }
+
+  /* ---- signal: three rows of two ---------------------------------------
+     The board's 328 / 407 / 407 columns become pairs. The first row is the
+     pair the hero hands over, so it keeps the artboard's card width; the
+     remaining four share the row evenly. */
+  .signal { block-size: auto; }
+
+  /* The signal shell is a centred column here, so the masthead has to be told
+     to span it — left to itself a flex item shrinks to its content and the
+     wordmark ends up in the middle of the screen. */
+  .signal__masthead {
+    position: static;
+    align-self: stretch;
+    margin-block-start: calc(34 * var(--u));
+    padding-inline: var(--gutter);
+  }
+
+  .board {
+    position: static;
+    block-size: auto;
+    inline-size: min(calc(667 * var(--u)), 100%);
+    margin-block-start: calc(24 * var(--u));
+    flex-direction: column;
+    gap: calc(11 * var(--u));
+  }
+  .board__col {
+    flex: none;
+    inline-size: 100%;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: calc(11 * var(--u));
+  }
+  .board__col--allocation .board-card { inline-size: calc(328 * var(--u)); }
+  .board__col--mid .board-card,
+  .board__col--end .board-card { flex: 1 1 0; min-inline-size: 0; }
+
+  .signal__title {
+    position: static;
+    align-self: stretch;
+    margin-block-start: calc(24 * var(--u));
+    padding-inline: var(--gutter);
+  }
+
+  /* The signal section lays out in flow rather than absolutely, so it needs
+     to centre what it now stacks. */
+  .signal {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* ---- the travel, adapted ---------------------------------------------
+     Identical logic: the glow expands to own the screen while the cards
+     carry across. Only the edge it expands from changes — it grows upward
+     here because it entered from the bottom. */
+  .to-signal .hero__glow {
+    left: 0;
+    block-size: 100%;
+    border-radius: 0;
+  }
+  .morph-ready .hero__glow {
+    transition: block-size var(--morph-dur) var(--morph-ease),
+                border-radius var(--morph-dur) var(--morph-ease);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   21. The menu
+
+   Not a new visual language: the surface is the card's — 10% black over a
+   background blur, a 10% gradient hairline, the 25-unit radius — and the
+   links carry the masthead's own size, tracking and 50% rest opacity. The
+   call to action is the masthead's `.btn-nav`, unchanged.
+   -------------------------------------------------------------------------- */
+.burger {
+  display: none;
+  justify-self: end;
+  align-items: center;
+  justify-content: center;
+  inline-size: calc(40 * var(--u));
+  block-size: calc(40 * var(--u));
+  min-inline-size: 44px;
+  min-block-size: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+/* Two rules and a gap, at the brand mark's own stroke weight. */
+.burger__lines,
+.burger__lines::before {
+  display: block;
+  inline-size: calc(22 * var(--u));
+  block-size: max(1.5px, calc(2 * var(--u)));
+  border-radius: 999px;
+  background: var(--white);
+  transition: transform 260ms var(--morph-ease), opacity 200ms var(--morph-ease);
+}
+.burger__lines { position: relative; }
+.burger__lines::before {
+  content: '';
+  position: absolute;
+  inset-block-start: calc(-7 * var(--u));
+  inset-inline-start: 0;
+}
+.menu-open .burger__lines { transform: rotate(45deg); }
+.menu-open .burger__lines::before {
+  transform: translateY(calc(7 * var(--u))) rotate(-90deg);
+}
+
+.menu {
+  position: fixed;
+  z-index: 20;
+  inset-block-start: calc(104 * var(--u));
+  inset-inline: var(--gutter);
+  display: flex;
+  flex-direction: column;
+  gap: calc(20 * var(--u));
+  padding: calc(28 * var(--u));
+  border-radius: var(--radius-card);
+  background: rgba(0, 0, 0, 0.325);
+  -webkit-backdrop-filter: blur(calc(77.65 * var(--u)));
+          backdrop-filter: blur(calc(77.65 * var(--u)));
+  /* Closed is `visibility: hidden`, not an attribute and not `display: none`.
+     It keeps the panel out of the accessibility tree and out of the way of
+     pointer events — a closed menu that still owns its box swallows every
+     click aimed at the control that opens it — while leaving the fade
+     something to animate. The delayed visibility step holds it painted until
+     the fade has finished. */
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(calc(-8 * var(--u)));
+  transition: opacity 220ms var(--morph-ease),
+              transform 220ms var(--morph-ease),
+              visibility 0s linear 220ms;
+}
+.menu::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: var(--hairline);
+  background: linear-gradient(127.6deg,
+    rgba(0, 0, 0, 0.1) 4.14%,
+    rgba(102, 102, 102, 0.1) 54.67%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  pointer-events: none;
+}
+.menu-open .menu {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: none;
+  transition: opacity 220ms var(--morph-ease),
+              transform 220ms var(--morph-ease),
+              visibility 0s;
+}
+
+.menu__list {
+  display: flex;
+  flex-direction: column;
+  gap: calc(18 * var(--u));
+}
+.menu__list a {
+  display: block;
+  padding-block: calc(6 * var(--u));
+  font-size: calc(16 * var(--u));
+  line-height: 1.1875;
+  letter-spacing: var(--track-snug);
+  color: var(--white);
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+}
+.menu__list a:hover,
+.menu__list a:focus-visible { opacity: 1; }
+
+.menu__cta {
+  justify-self: stretch;
+  justify-content: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu,
+  .burger__lines,
+  .burger__lines::before { transition-duration: 0.01ms; }
+}

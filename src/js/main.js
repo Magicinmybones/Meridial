@@ -309,10 +309,67 @@
     }, true);
   }
 
+  /**
+   * The tablet menu.
+   *
+   * State only — whether it is open. Which widths show the burger at all, and
+   * what the panel looks like, are the stylesheet's business (§20, §21); there
+   * is no viewport measuring here. Escape closes it, a click outside closes
+   * it, and focus returns to the control that opened it.
+   */
+  function Menu() {
+    var root = document.documentElement;
+    var menu = document.querySelector('[data-menu]');
+    var toggles = document.querySelectorAll('[data-menu-toggle]');
+    if (!(menu && toggles.length)) return;
+
+    var opener = null;
+
+    function set(open) {
+      root.classList.toggle('menu-open', open);
+      for (var i = 0; i < toggles.length; i++) {
+        toggles[i].setAttribute('aria-expanded', open ? 'true' : 'false');
+        toggles[i].setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+      }
+      if (open) {
+        var first = menu.querySelector('a');
+        if (first) first.focus();
+      } else if (opener) {
+        opener.focus();
+      }
+    }
+
+    for (var i = 0; i < toggles.length; i++) {
+      (function (btn) {
+        btn.addEventListener('click', function () {
+          var open = !root.classList.contains('menu-open');
+          opener = btn;
+          set(open);
+        });
+      })(toggles[i]);
+    }
+
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && root.classList.contains('menu-open')) set(false);
+    });
+
+    document.addEventListener('click', function (e) {
+      if (!root.classList.contains('menu-open')) return;
+      if (menu.contains(e.target) || e.target.closest('[data-menu-toggle]')) return;
+      set(false);
+    });
+
+    /* A destination was chosen — the menu has done its job. */
+    menu.addEventListener('click', function (e) {
+      if (e.target.closest('a')) set(false);
+    });
+  }
+
   function init() {
     buildChartGrid();
     measureMarquee();
     releaseReveals();
+    Menu();
 
     var move = Transition();
     if (move) {

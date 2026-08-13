@@ -71,6 +71,14 @@
           </nav>
 
           <a class="btn-nav" href="#">Book a demo</a>
+
+          <!-- Shown only once the navigation no longer fits (§20). Its lines
+               are the brand mark's own stroke weight, so the control reads as
+               part of the same drawing. -->
+          <button class="burger" type="button" aria-label="Open menu"
+                  aria-expanded="false" aria-controls="site-menu" data-menu-toggle>
+            <span class="burger__lines" aria-hidden="true"></span>
+          </button>
         </header>
 
         <div class="hero__body">
@@ -226,6 +234,11 @@
         </nav>
 
         <a class="btn-nav" href="#">Book a demo</a>
+
+        <button class="burger" type="button" aria-label="Open menu"
+                aria-expanded="false" aria-controls="site-menu" data-menu-toggle>
+          <span class="burger__lines" aria-hidden="true"></span>
+        </button>
       </header>
 
       <div class="board">
@@ -417,6 +430,21 @@
   </section>
   </div>
 
+
+  <!-- The tablet navigation. Same destinations, same call to action, same
+       words — moved, not reinvented. Its surface is the card's own: 10% black
+       over a background blur, a 10% gradient hairline, the 25-unit radius. -->
+  <div class="menu" id="site-menu" data-menu>
+    <nav class="menu__nav" aria-label="Primary">
+      <ul class="menu__list">
+        <li><a href="#">Platform</a></li>
+        <li><a href="#">Compliance</a></li>
+        <li><a href="#">Security</a></li>
+        <li><a href="#">Company</a></li>
+      </ul>
+    </nav>
+    <a class="btn-nav menu__cta" href="#">Book a demo</a>
+  </div>
 </main>
 
 <script src="js/main.js"></script>

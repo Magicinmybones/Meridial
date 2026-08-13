@@ -186,14 +186,101 @@ about the artboard's centre rather than pushing right, which is what holds the
 
 ## Scope
 
-Laptop, desktop and ultrawide. Within that range there are no breakpoints —
-the columns are proportions and the vertical stack distributes its slack, so
-the layout is resolution-independent rather than tuned per size.
+Laptop, desktop and ultrawide keep the two-column architecture. Within that
+range there are no breakpoints — the columns are proportions and the vertical
+stack distributes its slack, so the layout is resolution-independent rather
+than tuned per size.
 
-Narrower viewports still render intact, but the two-column split holds all the
-way down, which is wrong below roughly 900 units of width. Tablet and handheld
-want the panel stacked under the content; that reflow is the one thing the
-stylesheet still owes, and §10 is where it belongs.
+### Where the desktop architecture actually fails
+
+Measured rather than assumed. Walking the viewport down from 1920 to 744
+produces no collision, no overflow and no wrapping fault at any width — the
+composition is a pure scale, so nothing breaks geometrically. What degrades is
+`--u`, and with it legibility and touch size:
+
+| viewport | `--u` | subtitle | card label | button |
+|---|---|---|---|---|
+| 1366 × 768 * | 0.661 | 13.2px | 7.9px | 41px |
+| 1194 × 834 | 0.718 | 14.4px | 8.6px | 45px |
+| 1080 × 810 | 0.642 | 13.4px | 8.1px | 42px |
+| 1024 × 768 | 0.638 | 12.8px | 7.7px | 40px |
+| 962 × 601 | 0.518 | 10.4px | 6.2px | 32px |
+| 834 × 1194 | 0.519 | 10.4px | 6.2px | 32px |
+| 768 × 1024 | 0.478 | 9.6px | 5.7px | 30px |
+
+\* the smallest size this design already ships at
+
+Two things follow. The landscape tablets are **better** than the smallest
+shipping desktop size — 1194 × 834 beats 1366 × 768 — so moving them to another
+architecture would be a downgrade. And because `--u` is
+`min(100vh/1161, 100vw/1606, 1.35px)`, it is the viewport's *aspect* that
+decides which term wins: below the artboard's own 1606/1161 the width drives
+it, the design shrinks into a tall screen and the vertical slack goes to waste.
+That is what a portrait tablet does, and it is the real failure.
+
+So the transition is not a width. It is `(max-width: 1023px) and
+(max-aspect-ratio: 5/4)` — narrow enough that the split can no longer hold a
+legible content column, *and* proportioned such that stacking is the better use
+of the space. A short landscape window (962 × 601) therefore keeps the desktop
+architecture: stacking needs height it does not have. Everything at or above
+1024px wide is untouched, which is the whole verified desktop range.
+
+### The tablet architecture
+
+Desktop fits the whole 1606 × 1161 artboard on screen. Tablet cannot, so it
+fits the tablet composition instead: 917 units across — the closing line's 847
+plus a gutter each side, which is wider than the card pair's 737 and is what
+actually binds — and 1440 down, the signal section's three rows plus its
+masthead, its closing line and 40 units held back so the line clears the bottom
+edge. The unit is still one number and every length still reads from it, so no
+size below the media query needed a second value.
+
+- **Hero** — one column. Content to the top, panel to the bottom. The title
+  keeps its three authored lines because the content column is now the full
+  width; in two columns at this width the same title wraps to six and the
+  section no longer fits a screen. The glow stops being the right-hand column
+  and becomes the band the panel sits in, sized from what it holds — 30 above
+  the cards, 386 of card, the caption's 34 + 28 + 16 + 44, 40 below — so its
+  edge lands clear of the marquee by construction.
+- **Signal** — the board's 328 / 407 / 407 columns become three rows of two.
+- **The two cards move from a stack to a pair**, and the board's first row does
+  the same, so the travel between them stays a single translate. Verified: at
+  every tablet width both cards share one delta and their widths match the
+  board's to under a pixel, exactly as on desktop.
+- **Navigation** — the links and call to action move into a menu behind a
+  burger. Same destinations, same words, same call to action; the panel's
+  surface is the card's own (10% black over the card's blur, a 10% gradient
+  hairline, the 25-unit radius) and the links carry the masthead's size,
+  tracking and 50% rest opacity.
+
+### Result
+
+23 viewports from 3440 × 1440 to 600 × 960: no horizontal or vertical
+overflow, nothing clipped, every desktop value unchanged.
+
+| viewport | mode | subtitle | card label | button |
+|---|---|---|---|---|
+| 1366 × 768 | desktop | 13.2px | 7.9px | 41px |
+| 1024 × 768 | desktop | 12.8px | 7.7px | 40px |
+| 912 × 1368 | tablet | 19.0px | 11.4px | 59px |
+| 834 × 1194 | tablet | 16.6px | 10.0px | 51px |
+| 768 × 1024 | tablet | 14.2px | 8.5px | 44px |
+| 600 × 960 | tablet | 13.1px | 7.9px | 41px |
+
+834 × 1194 goes from a 10.4px subtitle and a 32px button to 16.6px and 51px.
+The burger holds a 44px minimum whatever the unit does.
+
+Three faults surfaced during the work, all found by measurement rather than by
+eye: the board kept the artboard's fixed 689-unit height and its three rows
+overflowed it; the closing line wrapped at 800 × 1280 and pushed the section
+15px past the screen, which is what made the line the width constraint; and the
+hero grid centred its two rows, which floated the masthead down the screen
+until the burger sat underneath the menu it opens. A fourth was structural — a
+closed menu that keeps its box swallows every click aimed at that control, so
+the closed state is `visibility: hidden` in CSS rather than an attribute
+toggled from script.
+
+Handheld is still not addressed.
 
 ## Motion
 
