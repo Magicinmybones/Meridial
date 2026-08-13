@@ -351,5 +351,16 @@ the alternative is letting the page scroll, which buys 14–19px body text and
 loses the travel, since a shared-element morph needs both of its endpoints on
 screen at once.
 
+Two adjustments came out of using it on a phone. The width binds the unit
+there, not the height, so the composition is shorter than the screen — about
+190px spare at 390 x 844 — and the tablet grid handed all of it to the space
+between the content and the panel, opening a hole above the band. Letting the
+content row take the slack instead spends it where the desktop column already
+does, through `.hero__body`'s auto margins, and the marquee finishes a measured
+13–24px above the glow's edge rather than 190px. And the entry plays at 60% of
+its measured length: `--rv-scale` multiplies the whole timeline, so the delays
+and durations stay the one set read off the recording and every element keeps
+its place in the order — 1820ms on a phone against 3034ms elsewhere.
+
 Handheld beyond this — a scrolling variant, if the small type proves worse in
 the hand than the lost transition — is the one decision still open.

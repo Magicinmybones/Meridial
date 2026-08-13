@@ -1088,8 +1088,12 @@ img, svg { display: block; }
    declaration for as long as it is attached, so without this the travel could
    not fade the marquee or the panel's caption out afterwards — they would
    stay pinned at the opacity the reveal left them. */
+/* `--rv-scale` multiplies the whole timeline. The delays and durations stay
+   the measured ones — one set of numbers, read off the recording — and a
+   smaller screen simply plays them through faster (§22). */
 .is-ready [data-reveal]:not(.is-revealed) {
-  animation: reveal var(--rv-dur, 600ms) linear var(--rv-delay, 0ms) both;
+  animation: reveal calc(var(--rv-dur, 600ms) * var(--rv-scale, 1)) linear
+             calc(var(--rv-delay, 0ms) * var(--rv-scale, 1)) both;
 }
 
 /* The reveal ends at the element's own resting opacity, not at 1. The
@@ -1762,11 +1766,30 @@ img, svg { display: block; }
   :root {
     --u: min(calc(100vw / 866), calc(100vh / 1450), var(--u-max));
     --gutter: calc(14 * var(--u));
+
+    /* The entry at 60% of its measured length. A phone is held closer and read
+       faster, and three seconds of it is a long wait on a screen this size;
+       every element keeps its place in the order and its share of the whole. */
+    --rv-scale: 0.6;
+  }
+
+  /* On a phone the width binds the unit, not the height, so the composition is
+     shorter than the screen — about 190px spare at 390 x 844. The tablet grid
+     hands all of that to the space between the content and the panel, which
+     opens a hole above the band. Letting the content row take the slack
+     instead puts it back where the desktop column already spends it: through
+     `.hero__body`'s auto margins, between the masthead, the words and the
+     marquee. */
+  .hero__grid {
+    grid-template-rows: 1fr auto;
+    align-content: stretch;
   }
 
   /* The stack draws in with the unit rather than in proportion to it, so the
      composition keeps its own rhythm instead of tightening everywhere at once. */
-  .hero__content { padding-block: calc(30 * var(--u)) 0; }
+  /* The bottom padding is the band's clearance: with the content row taking
+     the slack, the marquee otherwise finishes exactly on the glow's edge. */
+  .hero__content { padding-block: calc(30 * var(--u)) calc(40 * var(--u)); }
   .hero__body { gap: calc(26 * var(--u)); }
   .trusted { margin-block-start: calc(26 * var(--u)); }
   .hero__panel { padding-block: calc(24 * var(--u)) calc(28 * var(--u)); }
