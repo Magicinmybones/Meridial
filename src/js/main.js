@@ -80,7 +80,7 @@
       if (frame) cancelAnimationFrame(frame);
       frame = requestAnimationFrame(function () {
         measureMarquee();
-        if (move) move.measure();
+        if (move) { move.sync(); move.measure(); }
       });
     };
   }
@@ -261,6 +261,7 @@
     var quiet = 0;
 
     function onWheel(e) {
+      if (!enabled()) return;
       e.preventDefault();
       clearTimeout(quiet);
       quiet = setTimeout(function () { locked = false; }, 260);
@@ -270,7 +271,9 @@
     }
 
     var touchY = null;
-    function onTouchStart(e) { touchY = e.touches[0].clientY; }
+    function onTouchStart(e) {
+      touchY = enabled() ? e.touches[0].clientY : null;
+    }
     function onTouchMove(e) {
       if (touchY === null) return;
       var dy = touchY - e.touches[0].clientY;
@@ -281,12 +284,32 @@
     function onTouchEnd() { touchY = null; }
 
     function onKey(e) {
+      if (!enabled()) return;
       var k = e.key;
       if (k === 'ArrowDown' || k === 'PageDown' || k === ' ' || k === 'End') {
         e.preventDefault(); go(true);
       } else if (k === 'ArrowUp' || k === 'PageUp' || k === 'Home') {
         e.preventDefault(); go(false);
       }
+    }
+
+    /* Whether the travel applies at this size is the stylesheet's call — it
+       declares `--morph`, and §22 turns it off where the sections no longer
+       share a screen. Reading it back beats measuring the window here: the
+       breakpoint then lives in one place, with the media queries that own it. */
+    function enabled() {
+      return parseFloat(
+        getComputedStyle(root).getPropertyValue('--morph')) !== 0;
+    }
+
+    /* Off means off: whatever state the travel left behind is cleared, so the
+       sections stand in the flow the stylesheet lays out for them. */
+    function sync() {
+      if (enabled()) return;
+      clearTimeout(timer);
+      shown = false;
+      root.classList.remove('to-signal', 'signal-shown', 'signal-in');
+      place(false);
     }
 
     function listen() {
@@ -297,7 +320,7 @@
       window.addEventListener('keydown', onKey);
     }
 
-    return { measure: measure, listen: listen };
+    return { measure: measure, listen: listen, sync: sync };
   }
 
   /**
@@ -386,6 +409,7 @@
     var move = Transition();
     if (move) {
       document.documentElement.classList.add('morph-ready');
+      move.sync();
       move.measure();
       move.listen();
     }

@@ -100,7 +100,13 @@
 
   /* --- motion ----------------------------------------------------------
      One second for the panel to take the screen, measured off the reference
-     recording (frames 272 to 332 at 60fps). */
+     recording (frames 272 to 332 at 60fps).
+
+     `--morph` is the stylesheet telling the script whether the travel applies
+     at this size. It is declared here rather than measured there so the
+     decision stays with the media queries that make it — the script has no
+     idea how wide the window is. */
+  --morph: 1;
   --morph-dur: 1000ms;
   --morph-ease: cubic-bezier(0.33, 0, 0.2, 1);
 
@@ -1710,4 +1716,210 @@ img, svg { display: block; }
   .menu,
   .burger__lines,
   .burger__lines::before { transition-duration: 0.01ms; }
+}
+
+/* --------------------------------------------------------------------------
+   22. Mobile architecture
+
+   THE BREAKPOINT
+
+   Measured the same way as the tablet one. The tablet composition fits 917
+   units across, so on a phone `--u` collapses and every length with it:
+
+     viewport          subtitle   card label   button
+      600 x 960 *        13.1px       7.8px      40px
+      576 x 1024         12.6px       7.5px      39px
+      500 x 890          10.9px       6.5px      34px
+      430 x 932           9.4px       5.6px      29px
+      390 x 844           8.5px       5.1px      26px
+      320 x 568           7.0px       4.2px      22px
+      844 x 390 **        6.7px       4.0px      21px
+                             * the narrowest size the tablet layout holds at
+                            ** a phone on its side, which falls to desktop
+
+   The tablet architecture is sound down to 600 and degrades below it, so that
+   is where mobile starts. The second clause catches a phone held sideways: it
+   is wider than 600 but far too short for the desktop composition, which puts
+   its body text at 6.7px.
+
+   WHAT CHANGES, AND THE ONE CONCESSION
+
+   Both wider architectures put a whole composition on one screen. A phone
+   cannot: the panel alone is 386 + 11 + 264 of card and another 122 of
+   caption, and the board is six cards deep. Holding that to one screen means
+   `--u` near 0.35 and body text near 6px — which is the one thing this brief
+   rules out ahead of viewport fitting. So on a phone, and only on a phone, the
+   page scrolls. Everything else is preserved: every element, the load reveal,
+   the marquee, the menu, the design language.
+
+   The travel goes with it. It is a shared-element morph between two full-screen
+   compositions, and neither endpoint is on screen at once here — it cannot be
+   adapted, only faked. `--morph: 0` tells the script to leave the gesture
+   alone (§21 of main.js reads it; there is no width check in the script), and
+   the signal section simply stands below the hero with its own content shown.
+
+   THE UNIT
+
+   447 units across: the widest card in the board is 407, plus a 20-unit gutter
+   each side. The 328-unit cards stretch to meet it, which is safe — their
+   contents are anchored to the left — while a card narrower than its artboard
+   width would draw its own text past its edge.
+   -------------------------------------------------------------------------- */
+@media (max-width: 599px), (max-height: 479px) and (max-width: 1023px) {
+
+  :root {
+    /* Capped at 0.95 so the step across the boundary is a step and not a
+       cliff: tablet's unit at 600 is 0.654, and an uncapped 447-unit reference
+       would hand 599 a unit of 1.34 — the same body text at twice the size,
+       one pixel apart. Capped, the composition stops growing at 425px and
+       centres, the way the desktop shell does at --shell-max. */
+    --u: min(calc(100vw / 447), 0.95px);
+    --gutter: calc(20 * var(--u));
+    --morph: 0;
+  }
+
+  /* The one concession: a phone scrolls. Both sections are lifted out of the
+     shared screen they occupy everywhere else (§18) and stand in the flow, so
+     the wrapper has to let go of its own screen-height clip as well. */
+  html, body { block-size: auto; overflow: visible; }
+
+  .page {
+    block-size: auto;
+    min-block-size: 100svh;
+    overflow: visible;
+  }
+
+  .section--hero,
+  .section--signal {
+    position: relative;
+    inset: auto;
+    min-block-size: 100svh;
+    block-size: auto;
+    overflow: visible;
+  }
+
+  /* §18 hides the signal section until the travel lands. With no travel it is
+     simply there. */
+  .section--signal {
+    visibility: visible;
+    align-items: flex-start;
+  }
+  .signal-shown .section--hero { visibility: visible; }
+
+  /* ---- hero ------------------------------------------------------------ */
+  .hero__grid {
+    grid-template-columns: 100%;
+    align-content: start;
+  }
+
+  .hero__content {
+    padding: calc(30 * var(--u)) var(--gutter) 0;
+  }
+
+  /* The display steps down to 56 units. At 96 the artboard's own size, a line
+     of it is wider than the phone and the heading breaks into six — dominant
+     is not the same as unreadable. Against the subtitle's 16 it still holds a
+     3.5:1 ratio, and the box is the column rather than the artboard's 842. */
+  .hero__title {
+    inline-size: 100%;
+    margin-block-start: calc(30 * var(--u));
+    font-size: calc(56 * var(--u));
+  }
+  .hero__sub { inline-size: 100%; }
+  .hero__body { gap: calc(30 * var(--u)); }
+  .hero__head { margin-block-end: 0; }
+  .trusted { margin-block-start: calc(30 * var(--u)); }
+
+  /* The two actions stay side by side — they fit, and stacking them would
+     lose the pairing the artboard gives them. */
+  .hero__actions { justify-content: flex-start; }
+
+  .hero__panel {
+    padding-block: calc(30 * var(--u)) calc(40 * var(--u));
+    padding-inline: var(--gutter);
+    justify-content: flex-start;
+  }
+
+  .panel {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: calc(11 * var(--u));
+    inline-size: 100%;
+  }
+  .panel .card { inline-size: 100%; flex: none; }
+  .card--value { margin-block-start: 0; }
+  /* The tablet pair gives these a 100% basis to break the row; in a column
+     that basis is the container's *height*, which threw them out of it. */
+  .panel__title,
+  .panel__caption { flex-basis: auto; }
+  .panel__title { margin-block-start: calc(34 * var(--u)); }
+
+
+  /* The glow is the band the panel sits in, sized from what it holds: 30
+     above, 386 + 11 + 264 of card, the caption's 34 + 28 + 16 + 44, 40 below. */
+  .hero__glow {
+    inset-inline: 0;
+    inset-block: auto 0;
+    block-size: calc(853 * var(--u));
+    border-radius: var(--radius-glow) var(--radius-glow) 0 0;
+  }
+
+  /* ---- masthead -------------------------------------------------------- */
+  .masthead { grid-template-columns: 1fr auto; }
+  .masthead .mainnav,
+  .masthead .btn-nav { display: none; }
+  .masthead .burger { display: flex; }
+  .menu { inset-block-start: calc(96 * var(--u)); }
+
+  /* ---- signal ---------------------------------------------------------- */
+  .signal {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    block-size: auto;
+    padding-block-end: calc(40 * var(--u));
+  }
+
+  .signal__masthead {
+    position: static;
+    align-self: stretch;
+    margin-block-start: calc(30 * var(--u));
+    padding-inline: var(--gutter);
+  }
+
+  /* One column of six. Every card takes the board's full content width — the
+     407-unit cards keep theirs, the 328-unit pair stretches to meet them. */
+  .board {
+    position: relative;
+    inset: auto;
+    block-size: auto;
+    inline-size: min(calc(447 * var(--u)), 100%);
+    margin-block-start: calc(24 * var(--u));
+    flex-direction: column;
+    gap: calc(11 * var(--u));
+    padding: calc(14 * var(--u));
+  }
+  .board__col {
+    flex: none;
+    inline-size: 100%;
+    flex-direction: column;
+    gap: calc(11 * var(--u));
+    margin-inline-start: 0;
+  }
+  .board__col .board-card { inline-size: 100%; flex: none; }
+
+  .signal__title {
+    position: static;
+    align-self: stretch;
+    margin-block-start: calc(30 * var(--u));
+    padding-inline: var(--gutter);
+    font-size: calc(34 * var(--u));
+  }
+
+  /* With no travel to reveal them, the signal's own groups play on load like
+     the hero's rather than waiting for a swap that never comes. */
+  .morph-ready [data-reveal='board-mid'],
+  .morph-ready [data-reveal='board-end'] { opacity: 1; }
+  .morph-ready [data-reveal='signal-title'] { --wipe: 112.5%; }
 }
