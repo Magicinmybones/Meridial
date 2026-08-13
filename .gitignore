@@ -1,6 +1,15 @@
-# What belongs in this repository is the site (src/), the harness that proves
-# it (tools/), the docs, and the two deploy configs. Everything below is
-# generated, local, or licensed — none of it should ever be committed.
+# Client-facing repository allowlist. Only the shipped static client, its
+# deployment configuration, and this ignore policy belong on the branch.
+/*
+!/.gitignore
+!/.github/
+/.github/*
+!/.github/workflows/
+/.github/workflows/*
+!/.github/workflows/deploy.yml
+!/src/
+!/src/**
+!/vercel.json
 
 # --- OS ---------------------------------------------------------------------
 .DS_Store
@@ -18,15 +27,10 @@ desktop.ini
 *~
 
 # --- Licensed typefaces -----------------------------------------------------
-# See docs/typography.md. Suisse Intl is dropped in locally and must not be
-# redistributed through this repository. The open faces that stand in for it
-# are committed deliberately.
+# Suisse Intl may be dropped in locally but must not be redistributed.
 src/assets/fonts/SuisseIntl-*
 
-# --- Verification harness output --------------------------------------------
-# tools/verify-layout.py copies the site, serves it, and writes screenshots.
-tools/.probe-site/
-tools/.shots/
+# --- Generated output --------------------------------------------------------
 __pycache__/
 *.py[cod]
 .pytest_cache/
@@ -42,7 +46,6 @@ blob-report/
 # --- Local environments -----------------------------------------------------
 .env
 .env.*
-!.env.example
 venv/
 .venv/
 
