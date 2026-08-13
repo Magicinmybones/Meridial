@@ -740,11 +740,21 @@ img, svg { display: block; }
 
 /* Artboard: brand at x34, navigation centred on the board's own centre, call
    to action ending 43.34 from the right. Unlike the hero's, this masthead
-   spans the full width — the same three-track grid does both. */
+   spans the full width — the same three-track grid does both.
+
+   The insets are units, not percentages of the board, because the hero states
+   its own gutter in units (§4, `.hero__content` padding). Both mastheads sit
+   in the same box — the shell, capped and centred — so stating one in units
+   and the other as a fraction of 1606 made them agree only at the artboard's
+   own aspect and drift apart everywhere else: 3 px at 1280x800, 11 px at
+   2560x1440. The travel slides the navigation and the call to action onto
+   their signal positions, so that drift landed entirely on the wordmark, which
+   snapped sideways at the swap. Held in units, the two boxes differ by the one
+   unit the artboards actually differ by. */
 .signal__masthead {
   position: absolute;
-  left: calc(100% * 34 / var(--artboard-w));
-  right: calc(100% * 43.34 / var(--artboard-w));
+  left: calc(34 * var(--u));
+  right: calc(43.34 * var(--u));
   top: calc(46 * var(--u));
 }
 
@@ -920,10 +930,18 @@ img, svg { display: block; }
   inline-size: calc(68.83 * var(--u));
   block-size: calc(var(--h) * var(--u));
   border-radius: calc(12 * var(--u));
+  /* The hatch is an instance of the same line component the radar uses, so its
+     stored colour is themed away too. Measured off the reference instead: a
+     horizontal scan across a bar sweeps 0 to 82 of 255 with a period of 11.5
+     units, which is a 4-unit perpendicular period at this angle
+     (4 / sin 20.209 = 11.58) peaking at 0.32 white. The ramp is soft, not
+     switched — the artboard's lines are feathered at this scale, so the stops
+     ramp to the peak and back rather than stepping on and off. */
   background:
     repeating-linear-gradient(-20.209deg,
-      rgba(231, 231, 231, 0.07) 0 calc(2 * var(--u)),
-      transparent calc(2 * var(--u)) calc(4 * var(--u))),
+      rgba(255, 255, 255, 0) 0,
+      rgba(255, 255, 255, 0.32) calc(2 * var(--u)),
+      rgba(255, 255, 255, 0) calc(4 * var(--u))),
     #0B0B0B;
 }
 .allocation__bar--lead {
@@ -962,9 +980,15 @@ img, svg { display: block; }
   fill: rgba(255, 255, 255, 0.2);
   stroke: rgba(255, 255, 255, 0.1);
 }
+/* White, not the `#4AFAA9` the file stores. That stroke is bound to a library
+   variable and the artboard resolves it monochrome — the same is true of the
+   hatch bitmap it outlines (stored chartreuse) and the indicator chips (stored
+   `#32A7D4`). Sampled off the reference render, every channel in this region
+   comes back equal: the outline and the hatch both paint pure white. Stored
+   colour is not painted colour anywhere in this file. */
 .radar__area1 {
   fill: none;
-  stroke: #4AFAA9;
+  stroke: var(--white);
   stroke-width: 2;
 }
 .radar__months text {
@@ -982,6 +1006,11 @@ img, svg { display: block; }
   left: calc(120.5 * var(--u));
   top: calc(25 * var(--u));
 }
+/* Each chip is an instance of the same indicator component, and each overrides
+   the master's fill: the first to `#1C1C1C`, which all but disappears against
+   the card, the other two to white. The master's own `#32A7D4` is never
+   painted — reading it instead of the overrides is what put three blue pills
+   on a monochrome board. */
 .radar__chips li {
   position: absolute;
   top: calc(var(--y) * var(--u));
@@ -989,7 +1018,7 @@ img, svg { display: block; }
   align-items: center;
   padding: calc(2 * var(--u)) calc(4 * var(--u));
   border-radius: calc(6 * var(--u));
-  background: #32A7D4;
+  background: #1C1C1C;
   font-family: 'DM Sans', var(--font-sans);
   font-weight: 500;
   font-size: calc(12 * var(--u));
@@ -997,6 +1026,10 @@ img, svg { display: block; }
   letter-spacing: var(--track-narrow);
   color: var(--white);
   white-space: nowrap;
+}
+.radar__chips li + li {
+  background: var(--white);
+  color: #0B0B0B;                       /* measured 9/255 in the reference */
 }
 
 /* --------------------------------------------------------------------------
@@ -1148,11 +1181,17 @@ img, svg { display: block; }
   transform: translateX(var(--hero-out-x, -12vw));
 }
 
+/* The wordmark travels on the same terms. Its delta is small — the artboards
+   put it at x35 in the hero and x34 here — but it is not zero, and anything in
+   the masthead that is not carried across the swap arrives by teleporting.
+   Measured like the other two, so it stays right at every viewport. */
+.morph-ready .section--hero .brand,
 .morph-ready .section--hero .mainnav,
 .morph-ready .section--hero .btn-nav {
   transition: transform 850ms var(--morph-ease) 150ms;
   will-change: transform;
 }
+.to-signal .section--hero .brand   { transform: translateX(var(--brand-dx, 0px)); }
 .to-signal .section--hero .mainnav { transform: translateX(var(--nav-dx, 0px)); }
 .to-signal .section--hero .btn-nav { transform: translateX(var(--cta-dx, 0px)); }
 

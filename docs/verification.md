@@ -91,6 +91,51 @@ Text-heavy regions cannot be corroborated more precisely: the reference export
 embedded in the `.fig` is 359 × 269, at which size its type is illegible. It
 confirms placement, tone and mass; the numeric extraction covers the rest.
 
+### Stored colour is not painted colour
+
+The board carried three colours the artboard never paints: a green radar
+outline, a chartreuse hatch bitmap, and three blue indicator chips. All three
+are in the file, and none of them renders.
+
+- `Area 1`'s stroke is `#4AFAA9`, bound to a library variable. The artboard
+  resolves it monochrome.
+- Its fill is a bitmap of chartreuse lines (`#D7FF5E` on transparent), themed
+  the same way.
+- The chips are instances of one indicator component whose master is
+  `#32A7D4`. Each instance overrides it — the first to `#1C1C1C`, which all
+  but vanishes against the card, the other two to white with near-black text.
+  Reading the master instead of the overrides is what produced three blue
+  pills.
+- The bar hatch is an instance of the same line component, whose 144 line
+  children are `#8E62EF` in the file.
+
+Sampled across the whole region of the reference render, every channel comes
+back equal — R = G = B at every point. The rendered values are the
+specification; the stored ones are a theme away from it. The texture asset is
+now rewritten with its RGB forced to white and its alpha untouched, so the
+pattern's geometry and feathering stay byte-identical and only the hue changes.
+
+Two hatch faults came out of the same pass, both measured by autocorrelation
+along a scan line rather than by eye:
+
+| hatch | reference | before | after |
+|---|---|---|---|
+| radar | 8.65 units | 2.89 | 8.46 |
+| bars | 11.56 units | 11.55 | 11.55 |
+
+The radar's was three times too dense because the bitmap was being *stretched*
+into the polygon. The artboard crops it instead: the paint transform maps the
+node's box onto the middle third of the image's width (`m00` 0.3333, `m02`
+0.3333) and the middle 39.3% of its height (`m11` 0.39266, `m12` 0.30367) —
+one uniform 0.7443 scale, so 530 × 414 draws at 394.5 × 308.1, offset to put
+that crop at the origin.
+
+The bars' period was already right but the contrast was not: a horizontal scan
+across a bar in the reference sweeps 0 to 82 of 255, where ours reached 18. The
+stops now ramp to 0.32 white and back rather than switching on and off, because
+the artboard's lines are feathered at this scale. Measured after: 13–88 against
+the reference's 0–81.
+
 ### The two panel cards
 
 The recording gives a better reference than the embedded export: at 1800 × 1350
@@ -178,9 +223,45 @@ curves per frame, not sampled. Times relative to the travel's start (f272):
 
 The masthead finding is the important one: its navigation slides from the
 hero's column-bound layout to the signal's full-width one (CTA x388→x615 in
-the 720-wide reference), handing over at the swap. Both deltas are measured
+the 720-wide reference), handing over at the swap. Every delta is measured
 from the two laid-out mastheads at runtime — nothing is hardcoded, so the
 slide is correct at every viewport.
+
+### The wordmark's snap
+
+Traced through the travel in a real browser at nine viewports, in both
+directions, sampling every masthead part per animation frame: **nothing in the
+masthead moves vertically** — the hero's top and the signal's agree to 0.00 px
+at every viewport, and the page never scrolls or changes width. The fault was
+horizontal, and it was on the one part of the masthead that was not being
+carried.
+
+The two mastheads sit in the same box — the shell, capped and centred — but
+stated their insets in different terms. The hero's came from `.hero__content`'s
+padding, in units (`35 × --u`); the signal's were a fraction of the artboard
+(`34 / 1606 × 100%`). Those agree only at the artboard's own aspect and drift
+apart everywhere else:
+
+| viewport | wordmark gap, before | after |
+|---|---|---|
+| 1280 × 800 | +2.98 px | −0.69 px |
+| 1440 × 900 | +3.35 px | −0.79 px |
+| 1536 × 864 | +6.49 px | −0.73 px |
+| 1920 × 1080 | +8.09 px | −0.92 px |
+| 2560 × 1440 | +10.78 px | −1.25 px |
+
+The travel slides the navigation and the call to action onto their signal
+positions, so the whole of that drift landed on the wordmark, which snapped
+sideways at the swap — right as everything else settled. Holding both insets in
+units leaves the two boxes differing by the one unit the artboards actually
+differ by (x35 against x34), and the wordmark now travels on the same measured,
+translate-only terms as the other two.
+
+Measured on the frames either side of the handover, the visible masthead is now
+continuous to within **0.05 px** on the wordmark and **0.22 px** on the call to
+action, at every viewport — against 3–11 px before. Confirmed in the recording
+too: the wordmark's left edge holds at one column through the swap where it
+previously stepped across.
 
 Cascade verified with transitions disabled (headless cannot animate them):
 during the travel the nav computes `translateX(334.5px)` and the CTA

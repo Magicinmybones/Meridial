@@ -334,8 +334,17 @@
                       d="M 60.500 0.000 L 0.000 28.500 L 40.649 90.273 L 51.567 105.149 L 78.366 123.000 L 123.030 100.190 L 123.030 28.500 L 60.500 0.000 Z"/>
 
                 <g transform="translate(39 91)">
-                  <image href="assets/images/radar-texture.png" x="0" y="0" width="131.5" height="121"
-                         clip-path="url(#signalRadarClip)" preserveAspectRatio="none"/>
+                  <!-- The artboard does not stretch this bitmap into the
+                       polygon, it crops it. Its paint transform maps the
+                       node's box onto the middle third of the image's width
+                       (m00 0.3333, m02 0.3333) and the middle 39.3% of its
+                       height (m11 0.39266, m12 0.30367) — one uniform 0.7443
+                       scale, so 530x414 draws at 394.5x308.1 offset to put
+                       that crop at the origin. Stretching it instead packed
+                       the lines three times too close. -->
+                  <image href="assets/images/radar-texture.png"
+                         x="-131.5" y="-93.58" width="394.5" height="308.1"
+                         clip-path="url(#signalRadarClip)"/>
                   <path class="radar__area1"
                         d="M 62.876 14.986 L 0.000 55.000 L 78.449 76.525 L 131.500 121.000 L 115.339 45.957 L 127.218 14.986 L 95.542 0.000 L 62.876 14.986 Z"/>
                 </g>
