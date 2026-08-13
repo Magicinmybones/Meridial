@@ -584,7 +584,7 @@ img, svg { display: block; }
     var(--white) 0 calc(2 * var(--u)),
     transparent calc(2 * var(--u)) calc(8 * var(--u)));
 }
-.tl-line--dim { opacity: 0.2; }
+.tl-line--dim { --o: 0.2; opacity: var(--o); }
 
 .card__label {
   font-size: calc(12 * var(--u));
@@ -594,7 +594,7 @@ img, svg { display: block; }
   color: var(--white);
   white-space: nowrap;
 }
-.card__label--dim { opacity: 0.2; }
+.card__label--dim { --o: 0.2; opacity: var(--o); }
 
 .stat {
   font-size: calc(32 * var(--u));
@@ -602,7 +602,7 @@ img, svg { display: block; }
   letter-spacing: var(--track-narrow);
   color: var(--white);
 }
-.stat--sep { opacity: 0.3; }
+.stat--sep { --o: 0.3; opacity: var(--o); }
 
 .stat__unit {
   font-size: calc(14 * var(--u));
@@ -623,7 +623,8 @@ img, svg { display: block; }
   line-height: 1;
   letter-spacing: var(--track-narrow);
   color: var(--white);
-  opacity: 0.4;
+  --o: 0.4;
+  opacity: var(--o);
   white-space: nowrap;
 }
 
@@ -648,7 +649,8 @@ img, svg { display: block; }
 .chart-grid {
   width: calc(274 * var(--u));
   height: calc(120 * var(--u));
-  opacity: 0.45;
+  --o: 0.45;
+  opacity: var(--o);
 }
 
 .panel__title {
@@ -1034,41 +1036,70 @@ img, svg { display: block; }
 
 /* --------------------------------------------------------------------------
    17. Reveal
-   The hero plays itself in on load. Delays and durations are measured off the
-   reference recording, frame by frame at 60fps, and are the whole timing
-   specification — nothing else in the file schedules motion.
+   The hero plays itself in on load. Every delay and duration below was read
+   off the reference recording frame by frame at 60fps — an edge-energy curve
+   per element per frame, normalised against the settled hero and crossed at
+   5% and 95% — and together they are the whole timing specification. Nothing
+   else in the file schedules the load.
 
-   The reveal is opacity only. The title's luminance centroid holds steady
-   through the recorded reveal, so nothing travels; adding a rise would be an
-   invention.
+   The reveal is opacity only. Measured against elements whose ink fills their
+   band, the luminance centroid holds to under a pixel through the whole rise,
+   so nothing travels; adding a rise would be an invention.
+
+   The ramp is linear. Sampled at each tenth of their rise, the masthead, the
+   glow, the subtitle and the buttons all track a straight line to within 0.02
+   — where the eased curve this replaces was already at 0.42 by three tenths.
    -------------------------------------------------------------------------- */
-.js [data-reveal] {
+.js [data-reveal]:not(.is-revealed) {
   opacity: 0;
   will-change: opacity;
 }
 
 /* Only once the page has decided it can animate — without this the content is
-   invisible to anything that never runs the script. */
-.is-ready [data-reveal] {
-  animation: reveal var(--rv-dur, 600ms) cubic-bezier(0.33, 0, 0.2, 1)
-             var(--rv-delay, 0ms) both;
+   invisible to anything that never runs the script.
+
+   `is-revealed` is added when each reveal ends (main.js) and hands the
+   property back to the cascade. A filled animation outranks a normal
+   declaration for as long as it is attached, so without this the travel could
+   not fade the marquee or the panel's caption out afterwards — they would
+   stay pinned at the opacity the reveal left them. */
+.is-ready [data-reveal]:not(.is-revealed) {
+  animation: reveal var(--rv-dur, 600ms) linear var(--rv-delay, 0ms) both;
 }
 
+/* The reveal ends at the element's own resting opacity, not at 1. The
+   artboard rests several of these below full — the drift note at 0.4, the
+   two future reviews and their connectors at 0.2, the separator at 0.3, the
+   chart grid at 0.45 — and animating them to 1 made each overshoot and then
+   snap back the moment the cascade took over. `--o` is the single source for
+   both the resting value and the keyframe's target. */
 @keyframes reveal {
   from { opacity: 0; }
-  to   { opacity: 1; }
+  to   { opacity: var(--o, 1); }
 }
 
-.is-ready [data-reveal='masthead'] { --rv-delay:  50ms; --rv-dur: 650ms; }
-.is-ready [data-reveal='title-1']  { --rv-delay: 210ms; --rv-dur: 570ms; }
-.is-ready [data-reveal='title-2']  { --rv-delay: 280ms; --rv-dur: 620ms; }
-.is-ready [data-reveal='title-3']  { --rv-delay: 350ms; --rv-dur: 600ms; }
-.is-ready [data-reveal='sub']      { --rv-delay: 500ms; --rv-dur: 930ms; }
-.is-ready [data-reveal='glow']     { --rv-delay: 530ms; --rv-dur: 600ms; }
-.is-ready [data-reveal='actions']  { --rv-delay: 830ms; --rv-dur: 600ms; }
-.is-ready [data-reveal='marquee']  { --rv-delay: 830ms; --rv-dur: 620ms; }
-.is-ready [data-reveal='eyebrow']  { --rv-delay: 960ms; --rv-dur: 190ms; }
-.is-ready [data-reveal='cards']    { --rv-delay: 1030ms; --rv-dur: 1200ms; }
+/* The hero's own column, then the glow behind it. The glow is the longest
+   thing on screen — it takes nearly a second to reach strength while the
+   masthead and the first title line come and go. */
+.is-ready [data-reveal='masthead'] { --rv-delay:   70ms; --rv-dur: 615ms; }
+.is-ready [data-reveal='glow']     { --rv-delay:   90ms; --rv-dur: 970ms; }
+.is-ready [data-reveal='title-1']  { --rv-delay:  267ms; --rv-dur: 483ms; }
+.is-ready [data-reveal='title-2']  { --rv-delay:  417ms; --rv-dur: 450ms; }
+.is-ready [data-reveal='title-3']  { --rv-delay:  567ms; --rv-dur: 467ms; }
+.is-ready [data-reveal='sub']      { --rv-delay:  833ms; --rv-dur: 617ms; }
+.is-ready [data-reveal='actions']  { --rv-delay:  833ms; --rv-dur: 600ms; }
+.is-ready [data-reveal='marquee']  { --rv-delay:  850ms; --rv-dur: 600ms; }
+/* Last, and by far the fastest — three frames, where everything else takes
+   thirty. It reads as a snap, and that is what the recording shows. */
+.is-ready [data-reveal='eyebrow']  { --rv-delay: 1017ms; --rv-dur:  50ms; }
+
+/* The panel is a second act, and it starts only once the hero column has
+   settled. Its caption arrives before the cards it describes; the two card
+   shells then land, and their contents follow one at a time (see the per-item
+   delays in the markup, which are data in the same sense as --x and --y). */
+.is-ready [data-reveal='panel-note'] { --rv-delay: 1675ms; --rv-dur: 760ms; }
+.is-ready [data-reveal='card-1']     { --rv-delay: 1783ms; --rv-dur: 350ms; }
+.is-ready [data-reveal='card-2']     { --rv-delay: 1867ms; --rv-dur: 350ms; }
 
 /* The title's lines are laid out as blocks so each can hold its own delay.
    The rendered wrapping is what the artboard already produced.

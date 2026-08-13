@@ -110,44 +110,47 @@
 
       <!-- ---------- panel column ---------- -->
       <div class="hero__panel">
-        <div class="panel" data-reveal="cards" data-hero-panel>
+        <div class="panel" data-hero-panel>
 
-          <article class="card card--allocation">
-            <span class="card__item dot dot--filled" style="--x:28; --y:29"></span>
-            <p class="card__item card__label" style="--x:63; --y:34">Target allocation</p>
-            <span class="card__item tl-line" style="--x:38.5; --y:55; --len:185"></span>
+          <!-- Each item carries its own reveal delay and duration, read off
+               the recording frame by frame. They are data exactly as --x and
+               --y are: the artboard says where, the recording says when. -->
+          <article class="card card--allocation" data-reveal="card-1">
+            <span class="card__item dot dot--filled" data-reveal="item" style="--x:28; --y:29; --rv-delay:2000ms; --rv-dur:300ms"></span>
+            <p class="card__item card__label" data-reveal="item" style="--x:63; --y:34; --rv-delay:2000ms; --rv-dur:300ms">Target allocation</p>
+            <span class="card__item tl-line" data-reveal="item" style="--x:38.5; --y:55; --len:185; --rv-delay:2133ms; --rv-dur:333ms"></span>
 
-            <p class="card__item stat fig-box" style="--x:63;  --y:78; --w:72">60%</p>
-            <p class="card__item stat stat--sep fig-box" style="--x:161; --y:78; --w:13">/</p>
-            <p class="card__item stat fig-box" style="--x:200; --y:78; --w:72">40%</p>
-            <p class="card__item stat__unit fig-box" style="--x:63;  --y:120; --w:38">equity</p>
-            <p class="card__item stat__unit fig-box" style="--x:200; --y:120; --w:40">bonds</p>
+            <p class="card__item stat fig-box" data-reveal="item" style="--x:63;  --y:78; --w:72; --rv-delay:2383ms; --rv-dur:100ms">60%</p>
+            <p class="card__item stat stat--sep fig-box" data-reveal="item" style="--x:161; --y:78; --w:13; --rv-delay:2383ms; --rv-dur:100ms">/</p>
+            <p class="card__item stat fig-box" data-reveal="item" style="--x:200; --y:78; --w:72; --rv-delay:2383ms; --rv-dur:100ms">40%</p>
+            <p class="card__item stat__unit fig-box" data-reveal="item" style="--x:63;  --y:120; --w:38; --rv-delay:2467ms; --rv-dur:50ms">equity</p>
+            <p class="card__item stat__unit fig-box" data-reveal="item" style="--x:200; --y:120; --w:40; --rv-delay:2467ms; --rv-dur:50ms">bonds</p>
 
-            <p class="card__item pill pill--card" style="--x:63; --y:166">Rebalance needed</p>
-            <p class="card__item card__note" style="--x:63; --y:203">Bond allocation drifted 4.2%</p>
+            <p class="card__item pill pill--card" data-reveal="item" style="--x:63; --y:166; --rv-delay:2550ms; --rv-dur:50ms">Rebalance needed</p>
+            <p class="card__item card__note" data-reveal="item" style="--x:63; --y:203; --rv-delay:2683ms; --rv-dur:183ms">Bond allocation drifted 4.2%</p>
 
-            <span class="card__item dot dot--filled" style="--x:28; --y:247"></span>
-            <p class="card__item card__label" style="--x:63; --y:252">+7.2% YTD</p>
-            <span class="card__item tl-line tl-line--dim" style="--x:38.5; --y:274; --len:12"></span>
+            <span class="card__item dot dot--filled" data-reveal="item" style="--x:28; --y:247; --rv-delay:2117ms; --rv-dur:417ms"></span>
+            <p class="card__item card__label" data-reveal="item" style="--x:63; --y:252; --rv-delay:2117ms; --rv-dur:417ms">+7.2% YTD</p>
+            <span class="card__item tl-line tl-line--dim" data-reveal="item" style="--x:38.5; --y:274; --len:12; --rv-delay:2367ms; --rv-dur:417ms"></span>
 
-            <span class="card__item dot dot--hollow" style="--x:28; --y:290"></span>
-            <p class="card__item card__label card__label--dim" style="--x:63; --y:295">next review: Q3</p>
-            <span class="card__item tl-line tl-line--dim" style="--x:38.5; --y:316; --len:12"></span>
+            <span class="card__item dot dot--hollow" data-reveal="item" style="--x:28; --y:290; --rv-delay:2367ms; --rv-dur:417ms"></span>
+            <p class="card__item card__label card__label--dim" data-reveal="item" style="--x:63; --y:295; --rv-delay:2367ms; --rv-dur:417ms">next review: Q3</p>
+            <span class="card__item tl-line tl-line--dim" data-reveal="item" style="--x:38.5; --y:316; --len:12; --rv-delay:2600ms; --rv-dur:383ms"></span>
 
-            <span class="card__item dot dot--hollow" style="--x:28; --y:333"></span>
-            <p class="card__item card__label card__label--dim" style="--x:63; --y:338">next review: Q4</p>
+            <span class="card__item dot dot--hollow" data-reveal="item" style="--x:28; --y:333; --rv-delay:2600ms; --rv-dur:383ms"></span>
+            <p class="card__item card__label card__label--dim" data-reveal="item" style="--x:63; --y:338; --rv-delay:2600ms; --rv-dur:383ms">next review: Q4</p>
           </article>
 
-          <article class="card card--value">
-            <p class="card__item card__label" style="--x:28; --y:29">Whitmore Family Trust</p>
-            <p class="card__item value fig-box" style="--x:28; --y:70; --w:178">$18,420,500</p>
-            <p class="card__item value__delta fig-box" style="--x:216; --y:79; --w:50">&#9650; 2.4%</p>
+          <article class="card card--value" data-reveal="card-2">
+            <p class="card__item card__label" data-reveal="item" style="--x:28; --y:29; --rv-delay:2317ms; --rv-dur:350ms">Whitmore Family Trust</p>
+            <p class="card__item value fig-box" data-reveal="item" style="--x:28; --y:70; --w:178; --rv-delay:2533ms; --rv-dur:350ms">$18,420,500</p>
+            <p class="card__item value__delta fig-box" data-reveal="item" style="--x:216; --y:79; --w:50; --rv-delay:2533ms; --rv-dur:350ms">&#9650; 2.4%</p>
 
-            <svg class="card__item chart-grid" style="--x:28; --y:121"
+            <svg class="card__item chart-grid" data-reveal="item" style="--x:28; --y:121; --rv-delay:2667ms; --rv-dur:367ms"
                  viewBox="0 0 274 120" preserveAspectRatio="none"
                  aria-hidden="true" focusable="false" data-chart-grid></svg>
 
-            <svg class="card__item chart" style="--x:19; --y:132"
+            <svg class="card__item chart" data-reveal="item" style="--x:19; --y:132; --rv-delay:2667ms; --rv-dur:367ms"
                  viewBox="0 0 290 117" aria-hidden="true" focusable="false">
               <defs>
                 <linearGradient id="chartFill" x1="0" y1="0" x2="0" y2="1">
@@ -162,8 +165,8 @@
             </svg>
           </article>
 
-          <p class="panel__title">Real-time drift detection</p>
-          <p class="panel__caption">From target to rebalance — tracked automatically</p>
+          <p class="panel__title" data-reveal="panel-note">Real-time drift detection</p>
+          <p class="panel__caption" data-reveal="panel-note">From target to rebalance — tracked automatically</p>
         </div>
       </div>
 
