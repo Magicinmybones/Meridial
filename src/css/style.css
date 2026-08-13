@@ -757,7 +757,18 @@ img, svg { display: block; }
   position: absolute;
   left: calc(34 * var(--u));
   right: calc(43.34 * var(--u));
-  top: calc(46 * var(--u));
+  /* 46 units from the *section's* top, not the shell's.
+
+     The shell is 1161 units tall and centres inside the screen, so whenever
+     the viewport is proportionally taller than the artboard — any aspect below
+     1606/1161 — it sits inset from the top and carries everything with it. The
+     hero's masthead is anchored to the section, so the two disagreed by that
+     inset and the navigation stepped down at the swap: 13.9px at 1024x768,
+     nothing at 1920x1080. Subtracting the inset back out anchors both to the
+     same edge, and at the aspects where there is no inset the value is
+     unchanged. */
+  top: calc(46 * var(--u)
+            - max(0px, (100svh - var(--artboard-h) * var(--u)) / 2));
 }
 
 /* Artboard: 847 units, centred. */
@@ -1489,10 +1500,14 @@ img, svg { display: block; }
   /* The signal shell is a centred column here, so the masthead has to be told
      to span it — left to itself a flex item shrinks to its content and the
      wordmark ends up in the middle of the screen. */
+  /* Top-anchored, so the masthead lands on the hero's own 40 units rather
+     than being carried down by a shell that centres what it holds. */
+  .section--signal { align-items: flex-start; }
+
   .signal__masthead {
     position: static;
     align-self: stretch;
-    margin-block-start: calc(34 * var(--u));
+    margin-block-start: calc(40 * var(--u));
     padding-inline: var(--gutter);
   }
 
