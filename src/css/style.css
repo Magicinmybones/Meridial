@@ -1393,15 +1393,16 @@ img, svg { display: block; }
    actually binds — at 800 x 1280 the line wrapped to two lines and pushed the
    section 15px past the screen. Down, 1400 units: the signal section's three
    rows, its masthead and its closing line, which is the taller of the two
-   sections — 1400 of content and 40 held back, so the closing line clears the
-   bottom edge rather than sitting on it. The unit is still one number and
+   sections — its three rows at 386 + 385 + 385, their gaps, the board's own
+   padding, its masthead and its closing line, with 40 held back so the line
+   clears the bottom edge rather than sitting on it. The unit is still one number and
    every length still reads from it, so nothing below this comment needed a
    second set of sizes.
    -------------------------------------------------------------------------- */
 @media (max-width: 1023px) and (max-aspect-ratio: 5/4) {
 
   :root {
-    --u: min(calc(100vw / 917), calc(100vh / 1440), var(--u-max));
+    --u: min(calc(100vw / 917), calc(100vh / 1470), var(--u-max));
     --gutter: calc(35 * var(--u));
   }
 
@@ -1495,24 +1496,50 @@ img, svg { display: block; }
     padding-inline: var(--gutter);
   }
 
+  /* Every card keeps its artboard width. Their contents are positioned at
+     fixed artboard coordinates (--x), so a card narrower than the artboard
+     draws its own text past its edge — which is what shrinking the 407-unit
+     cards to share a 667-unit row did to 'Cash & alt', to the activity
+     figures and to the asset-class heading. The board is therefore as wide as
+     its widest row: 407 + 12 + 407, plus its own padding.
+
+     That leaves the travelling pair's row narrower than the two below it, by
+     the same 159 units the artboard's own first column is narrower than the
+     others. Centred, it reads as the composition it is rather than as a row
+     that failed to fill. */
+  /* `relative`, not `static`. The board's surface is an absolutely-positioned
+     ::before inset to it, and a static board hands that pseudo-element to the
+     nearest positioned ancestor instead — the whole signal shell. It then drew
+     from above the masthead to below the closing line, which both hid the
+     navigation and made the panel look far larger than the cards it holds. */
   .board {
-    position: static;
+    position: relative;
+    /* The artboard's absolute offsets were inert while the board was static;
+       they are not once it is positioned, and top: 236u would push it 236
+       units down its own flow position. */
+    inset: auto;
     block-size: auto;
-    inline-size: min(calc(667 * var(--u)), 100%);
+    inline-size: min(calc(854 * var(--u)), 100%);
     margin-block-start: calc(24 * var(--u));
     flex-direction: column;
-    gap: calc(11 * var(--u));
+    gap: calc(12 * var(--u));
+    padding: calc(14 * var(--u));
   }
   .board__col {
     flex: none;
     inline-size: 100%;
     flex-direction: row;
     align-items: flex-start;
-    gap: calc(11 * var(--u));
+    justify-content: center;
+    gap: calc(12 * var(--u));
+    /* The artboard nudges the second and third columns right of the first;
+       stacked, that offset would push whole rows out of alignment. */
+    margin-inline-start: 0;
   }
+  .board__col--allocation { gap: calc(11 * var(--u)); }
   .board__col--allocation .board-card { inline-size: calc(328 * var(--u)); }
   .board__col--mid .board-card,
-  .board__col--end .board-card { flex: 1 1 0; min-inline-size: 0; }
+  .board__col--end .board-card { flex: none; inline-size: calc(407 * var(--u)); }
 
   .signal__title {
     position: static;

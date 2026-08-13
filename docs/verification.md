@@ -243,6 +243,12 @@ size below the media query needed a second value.
   the cards, 386 of card, the caption's 34 + 28 + 16 + 44, 40 below — so its
   edge lands clear of the marquee by construction.
 - **Signal** — the board's 328 / 407 / 407 columns become three rows of two.
+  Every card keeps its artboard width. Their contents are positioned at fixed
+  artboard coordinates, so a card narrower than the artboard draws its own text
+  past its edge — letting the 407-unit cards share a 667-unit row clipped
+  'Cash & alt', collided the activity figures with the radar and ran the
+  asset-class heading into its own title. The board is therefore as wide as its
+  widest row, and the travelling pair's row centres inside it.
 - **The two cards move from a stack to a pair**, and the board's first row does
   the same, so the travel between them stays a single translate. Verified: at
   every tablet width both cards share one delta and their widths match the
@@ -270,9 +276,16 @@ overflow, nothing clipped, every desktop value unchanged.
 834 × 1194 goes from a 10.4px subtitle and a 32px button to 16.6px and 51px.
 The burger holds a 44px minimum whatever the unit does.
 
-Three faults surfaced during the work, all found by measurement rather than by
-eye: the board kept the artboard's fixed 689-unit height and its three rows
-overflowed it; the closing line wrapped at 800 × 1280 and pushed the section
+The board's surface is an absolutely-positioned `::before` inset to it, so the
+board has to stay `positioned` on tablet. Left `static`, that pseudo-element
+resolved against the signal shell instead and drew from above the masthead to
+below the closing line — which hid the navigation and made the panel look far
+larger than the cards it holds. Positioning it back also means the artboard's
+`top: 236u`, inert while the board was static, applies again; the offsets are
+reset with it.
+
+Faults found by measurement along the way: the board kept the artboard's
+fixed 689-unit height and its three rows overflowed it; the closing line wrapped at 800 × 1280 and pushed the section
 15px past the screen, which is what made the line the width constraint; and the
 hero grid centred its two rows, which floated the masthead down the screen
 until the burger sat underneath the menu it opens. A fourth was structural — a
