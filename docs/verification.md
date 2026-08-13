@@ -409,6 +409,31 @@ the 720-wide reference), handing over at the swap. Every delta is measured
 from the two laid-out mastheads at runtime — nothing is hardcoded, so the
 slide is correct at every viewport.
 
+### The masthead's step down
+
+The two mastheads have to sit at the same height or the navigation moves at the
+swap, and they did not. The signal shell is 1161 units tall and centres inside
+the screen, so whenever the viewport is proportionally taller than the artboard
+— any aspect below 1606/1161 — it sits inset from the top and carries its
+masthead down with it, while the hero's is anchored to the section. Measured as
+the difference between the two at rest:
+
+| viewport | before | after |
+|---|---|---|
+| 1920 × 1080 | 0.00px | 0.00px |
+| 1194 × 834 | 0.00px | 0.00px |
+| 1080 × 810 | 13.9px | 0.00px |
+| 1024 × 768 | 13.9px | 0.00px |
+| 834 × 1194 | 26.8px | 0.00px |
+| 912 × 1368 | 33.9px | 0.00px |
+
+The desktop fix subtracts that inset back out of the masthead's own offset, so
+at the aspects where there is no inset the value is unchanged. Tablet anchors
+the shell to the section's top instead and gives its masthead the hero's own
+40-unit offset. Traced per animation frame, the visible masthead now holds one
+y through the whole travel — a range of 0.00px at every viewport, desktop and
+tablet.
+
 ### The wordmark's snap
 
 Traced through the travel in a real browser at nine viewports, in both
