@@ -250,9 +250,17 @@ size below the media query needed a second value.
   asset-class heading into its own title. The board is therefore as wide as its
   widest row, and the travelling pair's row centres inside it.
 - **The two cards move from a stack to a pair**, and the board's first row does
-  the same, so the travel between them stays a single translate. Verified: at
-  every tablet width both cards share one delta and their widths match the
-  board's to under a pixel, exactly as on desktop.
+  the same, so the travel between them stays a single translate — and on tablet
+  a purely vertical one. That last part needed the travel measured **card to
+  card** rather than panel to column: a column and its first card share an edge
+  only while the column is the card's own width, which is true of the desktop
+  board and not of the tablet one, where the row spans the board and centres a
+  narrower pair inside it. Measured against the column, the cards drifted 64px
+  left over the travel and snapped back at the swap, so the movement read as
+  up-then-suddenly-right. Traced per animation frame across eleven viewports:
+  on tablet the cards' x now holds to within 0.02px for the whole travel and
+  the swap lands within 0.01px; on desktop the sideways travel is unchanged and
+  lands within 0.15px. Both cards still share one delta everywhere.
 - **Navigation** — the links and call to action move into a menu behind a
   burger. Same destinations, same words, same call to action; the panel's
   surface is the card's own (10% black over the card's blur, a 10% gradient

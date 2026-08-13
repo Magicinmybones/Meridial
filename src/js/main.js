@@ -120,6 +120,7 @@
     var sigCta = document.querySelector('.signal__masthead .btn-nav');
     var wash = document.querySelector('[data-signal-wash]');
     var col1 = document.querySelector('[data-board-col1]');
+    var boardCard = document.querySelector('.board-card--allocation');
     if (!(heroSection && signalSection && heroGlow && heroPanel && wash && col1)) {
       return null;
     }
@@ -158,15 +159,26 @@
       var g = rel(heroGlow, hs);
       var p = rel(heroPanel, hs);
       var w = rel(wash, ss);
-      var c = rel(col1, ss);
 
-      if (p.width && c.width) {
-        /* The glow's expansion is pure CSS (left animates to 0); only the
-           panel's travel needs measuring. Translate-only: the two card sets
-           are unit-identical, so there is nothing to scale. */
+      /* Card to card, not panel to column.
+         The column and its first card share an edge only while the column is
+         the card's own width, which is true of the desktop board and not of
+         the tablet one — there the row spans the board and centres a narrower
+         pair inside it. Measured against the column, the cards then travelled
+         to the row's left edge, 64px short of where they belong, and snapped
+         across at the swap. The card is the thing that moves, so the card is
+         what to measure. On desktop the two references coincide, so the value
+         is unchanged there. */
+      var from = heroCards.length ? rel(heroCards[0], hs) : p;
+      var to = boardCard ? rel(boardCard, ss) : rel(col1, ss);
+
+      if (from.width && to.width) {
+        /* The glow's expansion is pure CSS; only the cards' travel needs
+           measuring. Translate-only: the two card sets are unit-identical, so
+           there is nothing to scale. */
         panelTo =
-          'translate(' + (c.left - p.left).toFixed(2) + 'px,' +
-                         (c.top - p.top).toFixed(2) + 'px)';
+          'translate(' + (to.left - from.left).toFixed(2) + 'px,' +
+                         (to.top - from.top).toFixed(2) + 'px)';
 
         root.style.setProperty('--hero-out-x',
           (-rel(heroContent || heroSection, hs).width * 0.35).toFixed(1) + 'px');
