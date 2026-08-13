@@ -2,11 +2,6 @@
 # deployment configuration, and this ignore policy belong on the branch.
 /*
 !/.gitignore
-!/.github/
-/.github/*
-!/.github/workflows/
-/.github/workflows/*
-!/.github/workflows/deploy.yml
 !/src/
 !/src/**
 !/vercel.json
